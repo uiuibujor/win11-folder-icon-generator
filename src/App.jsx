@@ -1,35 +1,10 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import ColorPicker from 'react-best-gradient-color-picker';
 import { Download, RefreshCw, Folder, Camera, Upload, X } from 'lucide-react';
+import ColorPickers from './components/ColorPickers.jsx';
+import { getFillStyle, parseGradientOrColor } from './utils/gradients.js';
+import { canvasToICO } from './utils/exportIcon.js';
+import { calculateHslShifts, getCurrentColor, adjustBrightness, rgbToHex, parseColor } from './utils/colors.js';
 
-// 颜色选择器中文本地化配置
-const colorPickerLocales = {
-  CONTROLS: {
-    SOLID: '纯色',
-    GRADIENT: '渐变'
-  },
-  INPUTS: {
-    HEX: '十六进制',
-    RGB: 'RGB',
-    HSL: 'HSL',
-    HSV: 'HSV',
-    CMYK: 'CMYK'
-  },
-  TOOLS: {
-    EYE_DROPPER: '取色器',
-    COLOR_GUIDE: '色彩指南',
-    ADVANCED: '高级'
-  },
-  GRADIENT: {
-    LINEAR: '线性',
-    RADIAL: '径向',
-    ANGLE: '角度',
-    STOP: '色标'
-  },
-  PRESETS: {
-    TITLE: '预设颜色'
-  }
-};
 
 const Win11FolderGenerator = () => {
   const [folderColor, setFolderColor] = useState('#FFC83D');
@@ -90,70 +65,7 @@ const Win11FolderGenerator = () => {
   const memoizedTabColorValue = useMemo(() => tabColorValue, [tabColorValue]);
 
   // 十六进制转 rgba
-  function hexToRgba(hex) {
-    if (!hex) return 'rgba(0,0,0,1)';
-    let h = hex.replace('#', '');
-    if (h.length === 3) h = h.split('').map(c => c + c).join('');
-    const r = parseInt(h.slice(0, 2), 16);
-    const g = parseInt(h.slice(2, 4), 16);
-    const b = parseInt(h.slice(4, 6), 16);
-    return `rgba(${r}, ${g}, ${b}, 1)`;
-  }
-
-  // 解析 linear-gradient 或纯色
-  function parseGradientOrColor(value) {
-    if (!value || typeof value !== 'string') return { type: 'solid', color: 'rgba(255,255,255,1)' };
-    const v = value.trim();
-    if (v.startsWith('linear-gradient')) {
-      const m = v.match(/linear-gradient\(\s*([\d.]+)deg\s*,\s*(.*)\)/i);
-      const angle = m ? parseFloat(m[1]) : 90;
-      const stopsRaw = m ? m[2] : v.substring(v.indexOf('(') + 1, v.lastIndexOf(')'));
-      const parts = [];
-      let buf = '';
-      let depth = 0;
-      for (const ch of stopsRaw) {
-        if (ch === '(') depth++;
-        if (ch === ')') depth--;
-        if (ch === ',' && depth === 0) {
-          parts.push(buf.trim());
-          buf = '';
-        } else {
-          buf += ch;
-        }
-      }
-      if (buf.trim()) parts.push(buf.trim());
-      const stops = parts.map((p, i, arr) => {
-        const pm = p.match(/(rgba?\([^\)]+\)|#[0-9a-fA-F]{3,6})\s*(\d+(?:\.\d+)?)%?/);
-        const color = pm ? pm[1] : p;
-        const offset = pm && pm[2] ? Math.min(1, Math.max(0, parseFloat(pm[2]) / 100)) : (arr.length === 1 ? 0 : i / (arr.length - 1));
-        return { color, offset };
-      });
-      return { type: 'linear', angle, stops: stops.length ? stops : [{ color: v, offset: 0 }, { color: v, offset: 1 }] };
-    }
-    return { type: 'solid', color: v };
-  }
-
-  // 根据角度在矩形区域内创建 Canvas 渐变
-  function makeCanvasGradient(ctx, rect, grad) {
-    const { x, y, width, height } = rect;
-    const cx = x + width / 2;
-    const cy = y + height / 2;
-    const len = Math.max(width, height);
-    const rad = (grad.angle || 90) * Math.PI / 180;
-    const dx = Math.cos(rad) * len;
-    const dy = Math.sin(rad) * len;
-    const g = ctx.createLinearGradient(cx - dx, cy - dy, cx + dx, cy + dy);
-    grad.stops.forEach(s => g.addColorStop(s.offset, s.color));
-    return g;
-  }
-
-  function getFillStyle(ctx, rect, value) {
-    const parsed = parseGradientOrColor(value);
-    if (parsed.type === 'solid') return parsed.color;
-    if (parsed.type === 'linear') return makeCanvasGradient(ctx, rect, parsed);
-    return parsed.color;
-  }
-
+  
   // 将 ColorPicker 返回值规范为十六进制或保留渐变
   const normalizePickerValueToHexOrGradient = (v) => {
     const parsed = parseGradientOrColor(v);
@@ -395,122 +307,7 @@ const Win11FolderGenerator = () => {
     }
   };
 
-  // 颜色工具：HEX/RGB/HSL 转换与渐变调节
-  const hexToRgb = (hex) => {
-    const h = hex.replace('#', '');
-    const r = parseInt(h.substring(0, 2), 16);
-    const g = parseInt(h.substring(2, 4), 16);
-    const b = parseInt(h.substring(4, 6), 16);
-    return { r, g, b };
-  };
 
-  const rgbToHsl = (r, g, b) => {
-    r /= 255; g /= 255; b /= 255;
-    const max = Math.max(r, g, b), min = Math.min(r, g, b);
-    let h = 0, s = 0, l = (max + min) / 2;
-    if (max !== min) {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-      switch (max) {
-        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-        case g: h = (b - r) / d + 2; break;
-        case b: h = (r - g) / d + 4; break;
-      }
-      h *= 60;
-    }
-    return { h, s: s * 100, l: l * 100 };
-  };
-
-  const hslToRgb = (h, s, l) => {
-    h = ((h % 360) + 360) % 360;
-    s /= 100; l /= 100;
-    const c = (1 - Math.abs(2 * l - 1)) * s;
-    const hp = h / 60;
-    const x = c * (1 - Math.abs((hp % 2) - 1));
-    let r1 = 0, g1 = 0, b1 = 0;
-    if (hp >= 0 && hp < 1) { r1 = c; g1 = x; }
-    else if (hp >= 1 && hp < 2) { r1 = x; g1 = c; }
-    else if (hp >= 2 && hp < 3) { g1 = c; b1 = x; }
-    else if (hp >= 3 && hp < 4) { g1 = x; b1 = c; }
-    else if (hp >= 4 && hp < 5) { r1 = x; b1 = c; }
-    else { r1 = c; b1 = x; }
-    const m = l - c / 2;
-    const r = (r1 + m) * 255;
-    const g = (g1 + m) * 255;
-    const b = (b1 + m) * 255;
-    return { r, g, b };
-  };
-
-  const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
-  const rgbToCss = (r, g, b) => `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
-
-  const parseColor = (color) => {
-    if (color.startsWith('#')) return hexToRgb(color);
-    if (color.startsWith('rgb')) {
-      const nums = color.match(/\d+/g).map(Number);
-      return { r: nums[0], g: nums[1], b: nums[2] };
-    }
-    // 默认当作hex
-    return hexToRgb(color);
-  };
-
-  const adjustHslColor = (color, { hShift = 0, sShift = 0, lShift = 0 } = {}) => {
-    const { r, g, b } = parseColor(color);
-    let { h, s, l } = rgbToHsl(r, g, b);
-    h = (h + hShift) % 360; if (h < 0) h += 360;
-    s = clamp(s + sShift, 0, 100);
-    l = clamp(l + lShift, 0, 100);
-    const { r: nr, g: ng, b: nb } = hslToRgb(h, s, l);
-    return rgbToCss(nr, ng, nb);
-  };
-
-  // 保留亮度调整以兼容现有调用（基于RGB简单乘法）
-  const adjustBrightness = (color, factor) => {
-    const hex = color.replace('#', '');
-    const r = Math.min(255, Math.floor(parseInt(hex.substr(0, 2), 16) * factor));
-    const g = Math.min(255, Math.floor(parseInt(hex.substr(2, 2), 16) * factor));
-    const b = Math.min(255, Math.floor(parseInt(hex.substr(4, 2), 16) * factor));
-    return `rgb(${r}, ${g}, ${b})`;
-  };
-
-  // 颜色选择器辅助函数：将RGB转换为HEX格式
-  const rgbToHex = (r, g, b) => {
-    const toHex = (n) => {
-      const hex = Math.round(n).toString(16);
-      return hex.length === 1 ? '0' + hex : hex;
-    };
-    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-  };
-
-  // 计算当前颜色（基于基础颜色和HSL调整）
-  const getCurrentColor = (baseColor, hShift, sShift, lShift) => {
-    const adjustedColor = adjustHslColor(baseColor, { hShift, sShift, lShift });
-    const { r, g, b } = parseColor(adjustedColor);
-    return rgbToHex(r, g, b);
-  };
-
-  // 从选择的颜色计算HSL调整值
-  const calculateHslShifts = (baseColor, selectedColor) => {
-    const baseRgb = parseColor(baseColor);
-    const selectedRgb = parseColor(selectedColor);
-    
-    const baseHsl = rgbToHsl(baseRgb.r, baseRgb.g, baseRgb.b);
-    const selectedHsl = rgbToHsl(selectedRgb.r, selectedRgb.g, selectedRgb.b);
-    
-    let hShift = selectedHsl.h - baseHsl.h;
-    // 处理色相环绕
-    if (hShift > 180) hShift -= 360;
-    if (hShift < -180) hShift += 360;
-    
-    const sShift = selectedHsl.s - baseHsl.s;
-    const lShift = selectedHsl.l - baseHsl.l;
-    
-    return {
-      hShift: clamp(Math.round(hShift), -180, 180),
-      sShift: clamp(Math.round(sShift), -100, 100),
-      lShift: clamp(Math.round(lShift), -40, 40)
-    };
-  };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -530,139 +327,6 @@ const Win11FolderGenerator = () => {
     }
   };
 
-  // ICO格式转换函数
-  const canvasToICO = (canvas, size = 256) => {
-    // 创建临时canvas用于调整尺寸
-    const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
-    tempCanvas.width = size;
-    tempCanvas.height = size;
-    
-    // 计算源内容的上下左右留白并进行内容裁剪 + 居中缩放
-    const srcW = canvas.width;
-    const srcH = canvas.height;
-    const srcCtx = canvas.getContext('2d');
-    const srcImage = srcCtx.getImageData(0, 0, srcW, srcH);
-    const srcData = srcImage.data;
-    let minX = srcW, minY = srcH, maxX = -1, maxY = -1;
-    const alphaThreshold = 20; // 忽略低透明度阴影
-    for (let y = 0; y < srcH; y++) {
-      for (let x = 0; x < srcW; x++) {
-        const a = srcData[(y * srcW + x) * 4 + 3];
-        if (a > alphaThreshold) {
-          if (x < minX) minX = x;
-          if (x > maxX) maxX = x;
-          if (y < minY) minY = y;
-          if (y > maxY) maxY = y;
-        }
-      }
-    }
-
-    if (maxX < 0) {
-      // 没有内容，直接缩放
-      tempCtx.drawImage(canvas, 0, 0, size, size);
-    } else {
-      // 在源图上为阴影留出少量边距，避免被裁掉
-      const paddingSrc = Math.round(Math.max(srcW, srcH) * 0.02);
-      let sx = Math.max(0, minX - paddingSrc);
-      let sy = Math.max(0, minY - paddingSrc);
-      let sWidth = Math.min(srcW - sx, (maxX - minX + 1) + paddingSrc * 2);
-      let sHeight = Math.min(srcH - sy, (maxY - minY + 1) + paddingSrc * 2);
-
-      // 目标画布留出少量边距，最大化内容占比
-      const targetPadding = Math.round(size * 0.02); // 2% 画布边距
-      const availW = size - targetPadding * 2;
-      const availH = size - targetPadding * 2;
-      const scaleFit = Math.min(availW / sWidth, availH / sHeight);
-
-      const dw = Math.round(sWidth * scaleFit) - 6; // 总宽度减少6px (左4px + 右2px)
-      const dh = Math.round(sHeight * scaleFit);
-      const dx = Math.round((size - dw) / 2) + 1; // 向右偏移1px (左减4px，右减2px的平衡点)
-      const dy = Math.round((size - dh) / 2) - 4; // 向上偏移4px
-
-      // 使用裁剪矩形进行绘制，确保内容居中且更大
-      tempCtx.drawImage(canvas, sx, sy, sWidth, sHeight, dx, dy, dw, dh);
-    }
-    
-    // 获取图像数据
-    const imageData = tempCtx.getImageData(0, 0, size, size);
-    const data = imageData.data;
-    
-    // ICO文件头结构
-    const icoHeader = new ArrayBuffer(6);
-    const icoHeaderView = new DataView(icoHeader);
-    icoHeaderView.setUint16(0, 0, true); // Reserved
-    icoHeaderView.setUint16(2, 1, true); // Type (1 = ICO)
-    icoHeaderView.setUint16(4, 1, true); // Number of images
-    
-    // ICO目录条目
-    const icoEntry = new ArrayBuffer(16);
-    const icoEntryView = new DataView(icoEntry);
-    icoEntryView.setUint8(0, size === 256 ? 0 : size); // Width (0 = 256)
-    icoEntryView.setUint8(1, size === 256 ? 0 : size); // Height (0 = 256)
-    icoEntryView.setUint8(2, 0); // Color palette
-    icoEntryView.setUint8(3, 0); // Reserved
-    icoEntryView.setUint16(4, 1, true); // Color planes
-    icoEntryView.setUint16(6, 32, true); // Bits per pixel
-    
-    // 计算BMP数据大小
-    const bmpDataSize = 40 + (size * size * 4) + (size * size / 8); // Header + RGBA + AND mask
-    icoEntryView.setUint32(8, bmpDataSize, true); // Size of bitmap data
-    icoEntryView.setUint32(12, 22, true); // Offset to bitmap data (6 + 16)
-    
-    // BMP信息头
-    const bmpHeader = new ArrayBuffer(40);
-    const bmpHeaderView = new DataView(bmpHeader);
-    bmpHeaderView.setUint32(0, 40, true); // Header size
-    bmpHeaderView.setInt32(4, size, true); // Width
-    bmpHeaderView.setInt32(8, size * 2, true); // Height (doubled for ICO)
-    bmpHeaderView.setUint16(12, 1, true); // Planes
-    bmpHeaderView.setUint16(14, 32, true); // Bits per pixel
-    bmpHeaderView.setUint32(16, 0, true); // Compression
-    bmpHeaderView.setUint32(20, size * size * 4, true); // Image size
-    bmpHeaderView.setUint32(24, 0, true); // X pixels per meter
-    bmpHeaderView.setUint32(28, 0, true); // Y pixels per meter
-    bmpHeaderView.setUint32(32, 0, true); // Colors used
-    bmpHeaderView.setUint32(36, 0, true); // Important colors
-    
-    // 创建RGBA数据（需要垂直翻转）
-    const rgbaData = new ArrayBuffer(size * size * 4);
-    const rgbaView = new Uint8Array(rgbaData);
-    for (let y = 0; y < size; y++) {
-      for (let x = 0; x < size; x++) {
-        const srcIndex = (y * size + x) * 4;
-        const dstIndex = ((size - 1 - y) * size + x) * 4;
-        rgbaView[dstIndex] = data[srcIndex + 2]; // B
-        rgbaView[dstIndex + 1] = data[srcIndex + 1]; // G
-        rgbaView[dstIndex + 2] = data[srcIndex]; // R
-        rgbaView[dstIndex + 3] = data[srcIndex + 3]; // A
-      }
-    }
-
-    // 创建AND掩码（全部设为0，表示不透明）
-    const andMask = new ArrayBuffer(size * size / 8);
-    
-    // 合并所有数据
-    const totalSize = icoHeader.byteLength + icoEntry.byteLength + bmpHeader.byteLength + rgbaData.byteLength + andMask.byteLength;
-    const icoData = new Uint8Array(totalSize);
-    let offset = 0;
-    
-    icoData.set(new Uint8Array(icoHeader), offset);
-    offset += icoHeader.byteLength;
-    
-    icoData.set(new Uint8Array(icoEntry), offset);
-    offset += icoEntry.byteLength;
-    
-    icoData.set(new Uint8Array(bmpHeader), offset);
-    offset += bmpHeader.byteLength;
-    
-    icoData.set(rgbaView, offset);
-    offset += rgbaData.byteLength;
-    
-    icoData.set(new Uint8Array(andMask), offset);
-    
-    return new Blob([icoData], { type: 'image/x-icon' });
-  };
 
   const downloadImage = () => {
     const canvas = canvasRef.current;
@@ -741,7 +405,7 @@ const Win11FolderGenerator = () => {
               <Folder className="w-8 h-8 lg:w-10 lg:h-10 text-white" />
             </div>
             <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent">
-              Windows 11 文件夹生成器
+              Windows 11 文件夹图标生成器
             </h1>
           </div>
           <p className="text-gray-600 text-lg">打造专属的现代化文件夹图标，让你的桌面更加个性化</p>
@@ -861,43 +525,12 @@ const Win11FolderGenerator = () => {
                 
                 {/* 并排布局的颜色选择器 */}
                 <div className="bg-white rounded-2xl p-6 border-2 border-gradient-to-r from-blue-200/50 to-purple-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* 文件夹主体颜色 */}
-                    <div className="space-y-4">
-                      <label className="flex items-center gap-2 text-sm font-bold text-gray-800">
-                        📁 文件夹主体颜色
-                        <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">支持渐变</span>
-                      </label>
-                      <div className="border-2 border-dashed border-blue-200 rounded-xl p-3 bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:border-blue-400 transition-all duration-300">
-                        <ColorPicker
-                          value={bodyColorValue}
-                          onChange={handleBodyColorChange}
-                          hideOpacity={false}
-                          hideInputType={true}
-                          hideColorTypeBtns={true}
-                          locales={colorPickerLocales}
-                        />
-                      </div>
-                    </div>
-
-                    {/* 标签颜色 */}
-                    <div className="space-y-4">
-                      <label className="flex items-center gap-2 text-sm font-bold text-gray-800">
-                        🏷️ 标签颜色
-                        <span className="text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-full">支持渐变</span>
-                      </label>
-                      <div className="border-2 border-dashed border-purple-200 rounded-xl p-3 bg-gradient-to-br from-purple-50/50 to-pink-50/50 hover:border-purple-400 transition-all duration-300">
-                        <ColorPicker
-                          value={tabColorValue}
-                          onChange={handleTabColorChange}
-                          hideOpacity={false}
-                          hideInputType={true}
-                          hideColorTypeBtns={true}
-                          locales={colorPickerLocales}
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  <ColorPickers
+                    bodyValue={bodyColorValue}
+                    onBodyChange={handleBodyColorChange}
+                    tabValue={tabColorValue}
+                    onTabChange={handleTabColorChange}
+                  />
                 </div>
               </div>
 
@@ -1108,7 +741,7 @@ const Win11FolderGenerator = () => {
 
                   {/* 图标大小控制 */}
                   <div className="bg-white rounded-xl p-5 border border-gray-200/50 shadow-sm">
-                    <label className="flex items-center justify-between text-sm font-semibold text-gray-700 mb-4">
+                    <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-4">
                       📐 图标大小
                       <span className="text-blue-600 font-bold text-lg">{iconSize}px</span>
                     </label>
@@ -1208,10 +841,7 @@ const Win11FolderGenerator = () => {
               </div>
             </div>
             <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <span className="text-orange-600 font-bold">🖼️</span>
-                <span className="text-sm text-gray-700">图片会自动裁剪成圆形，建议使用方形图片</span>
-              </div>
+
               <div className="flex items-start gap-3">
                 <span className="text-red-600 font-bold">💾</span>
                 <span className="text-sm text-gray-700">PNG 格式支持透明背景，ICO 格式可直接用作系统图标</span>

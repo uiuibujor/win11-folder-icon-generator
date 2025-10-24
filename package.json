@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Windows 11 风格文件夹图标生成器",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
