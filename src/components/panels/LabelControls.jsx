@@ -1,5 +1,6 @@
 import React from 'react';
 import { Upload, X } from 'lucide-react';
+import { useLanguage } from '../../hooks/useLanguage.jsx';
 
 const LabelControls = ({
   showLabel,
@@ -31,11 +32,13 @@ const LabelControls = ({
   textPositionY,
   onChangeTextPositionY,
 }) => {
+  const { t } = useLanguage();
+  
   return (
     <div className="bg-white rounded-xl p-5 border border-gray-200/50 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-          🏷️ 标签内容
+          🏷️ {t('labelContent')}
         </label>
         <label className="flex items-center gap-3 cursor-pointer">
           <input
@@ -44,7 +47,7 @@ const LabelControls = ({
             onChange={(e) => onToggleShowLabel(e.target.checked)}
             className="w-5 h-5 accent-blue-600 rounded"
           />
-          <span className="text-sm font-medium text-gray-600">显示标签</span>
+          <span className="text-sm font-medium text-gray-600">{t('showLabel')}</span>
         </label>
       </div>
 
@@ -59,7 +62,7 @@ const LabelControls = ({
                   : 'border-gray-200 text-gray-600 hover:border-blue-300 hover:bg-blue-50'
               }`}
             >
-              📝 文字
+              📝 {t('text')}
             </button>
             <button
               onClick={() => onChangeLabelMode('image')}
@@ -69,7 +72,7 @@ const LabelControls = ({
                   : 'border-gray-200 text-gray-600 hover:border-blue-300 hover:bg-blue-50'
               }`}
             >
-              🖼️ 图片
+              🖼️ {t('image')}
             </button>
           </div>
 
@@ -77,20 +80,20 @@ const LabelControls = ({
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  📝 标签文字
+                  📝 {t('labelText')}
                 </label>
                 <input
                   type="text"
                   value={labelText}
                   onChange={(e) => onChangeLabelText(e.target.value)}
-                  placeholder="输入文字..."
+                  placeholder={t('textPlaceholder')}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  🎨 文字颜色
+                  🎨 {t('textColor')}
                 </label>
                 <div className="flex items-center gap-3">
                   <input
@@ -110,7 +113,7 @@ const LabelControls = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  🔤 字体选择
+                  🔤 {t('fontSelection')}
                 </label>
                 <select
                   value={fontFamily}
@@ -129,7 +132,7 @@ const LabelControls = ({
               <div className="space-y-4 bg-gray-50 rounded-xl p-4">
                 <div>
                   <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
-                    📏 文字大小
+                    📏 {t('textSize')}
                     <span className="text-blue-600 font-semibold">{textSize}%</span>
                   </label>
                   <input
@@ -141,14 +144,14 @@ const LabelControls = ({
                     className="w-full accent-blue-600 h-2 rounded-lg"
                   />
                   <div className="flex justify-between text-xs text-gray-500 mt-2">
-                    <span>小 (6%)</span>
-                    <span>大 (24%)</span>
+                    <span>{t('smallSize')}</span>
+                    <span>{t('largeSize')}</span>
                   </div>
                 </div>
 
                 <div>
                   <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
-                    ↔️ 水平位置
+                    ↔️ {t('horizontalPosition')}
                     <span className="text-blue-600 font-semibold">{textPositionX}%</span>
                   </label>
                   <input
@@ -160,15 +163,15 @@ const LabelControls = ({
                     className="w-full accent-blue-600 h-2 rounded-lg"
                   />
                   <div className="flex justify-between text-xs text-gray-500 mt-2">
-                    <span>左</span>
-                    <span>中</span>
-                    <span>右</span>
+                    <span>{t('left')}</span>
+                    <span>{t('center')}</span>
+                    <span>{t('right')}</span>
                   </div>
                 </div>
 
                 <div>
                   <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
-                    ↕️ 垂直位置
+                    ↕️ {t('verticalPosition')}
                     <span className="text-blue-600 font-semibold">{textPositionY}%</span>
                   </label>
                   <input
@@ -180,9 +183,9 @@ const LabelControls = ({
                     className="w-full accent-blue-600 h-3 rounded-lg"
                   />
                   <div className="flex justify-between text-xs text-gray-500 mt-2">
-                    <span>上</span>
-                    <span>中</span>
-                    <span>下</span>
+                    <span>{t('top')}</span>
+                    <span>{t('center')}</span>
+                    <span>{t('bottom')}</span>
                   </div>
                 </div>
               </div>
@@ -203,8 +206,8 @@ const LabelControls = ({
                   className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 transition-all duration-300 group"
                 >
                   <Upload className="w-10 h-10 text-gray-400 group-hover:text-blue-500 mb-3 transition-colors" />
-                  <span className="text-sm font-medium text-gray-600 group-hover:text-blue-600">点击上传图片</span>
-                  <span className="text-xs text-gray-400 mt-1">支持 JPG、PNG、GIF 格式</span>
+                  <span className="text-sm font-medium text-gray-600 group-hover:text-blue-600">{t('uploadImage')}</span>
+                  <span className="text-xs text-gray-400 mt-1">{t('supportedFormats')}</span>
                 </label>
               ) : (
                 <div className="relative">
@@ -225,61 +228,65 @@ const LabelControls = ({
               {customImage && (
                 <div className="space-y-4 bg-gray-50 rounded-xl p-4">
                   <div>
-                    <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
-                      📏 图片大小
-                      <span className="text-blue-600 font-semibold">{imageSize}%</span>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      📏 {t('imageSize')}
                     </label>
-                    <input
-                      type="range"
-                      min="10"
-                      max="80"
-                      value={imageSize}
-                      onChange={(e) => onChangeImageSize(Number(e.target.value))}
-                      className="w-full accent-blue-600 h-2 rounded-lg"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 mt-2">
-                      <span>小 (10%)</span>
-                      <span>大 (80%)</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-gray-500 min-w-[50px]">{t('smallImageSize')}</span>
+                      <input
+                        type="range"
+                        min="10"
+                        max="80"
+                        value={imageSize}
+                        onChange={(e) => onChangeImageSize(Number(e.target.value))}
+                        className="flex-1 accent-blue-600"
+                      />
+                      <span className="text-sm text-gray-500 min-w-[50px]">{t('largeImageSize')}</span>
+                    </div>
+                    <div className="text-center mt-2">
+                      <span className="text-sm font-medium text-blue-600">{imageSize}%</span>
                     </div>
                   </div>
 
                   <div>
-                    <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
-                      ↔️ 水平位置
-                      <span className="text-blue-600 font-semibold">{imagePositionX}%</span>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      ↔️ {t('horizontalPosition')}
                     </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={imagePositionX}
-                      onChange={(e) => onChangeImagePositionX(Number(e.target.value))}
-                      className="w-full accent-blue-600 h-2 rounded-lg"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 mt-2">
-                      <span>左</span>
-                      <span>中</span>
-                      <span>右</span>
+                    <div className="grid grid-cols-3 gap-2">
+                      {['left', 'center', 'right'].map((pos) => (
+                        <button
+                          key={pos}
+                          onClick={() => onChangeImagePositionX(pos)}
+                          className={`px-3 py-2 rounded-lg border-2 transition-all duration-300 text-sm font-medium ${
+                            imagePositionX === pos
+                              ? 'border-blue-500 bg-blue-50 text-blue-700'
+                              : 'border-gray-200 text-gray-600 hover:border-blue-300'
+                          }`}
+                        >
+                          {pos === 'left' ? t('left') : pos === 'center' ? t('center') : t('right')}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
                   <div>
-                    <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
-                      ↕️ 垂直位置
-                      <span className="text-blue-600 font-semibold">{imagePositionY}%</span>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      ↕️ {t('verticalPosition')}
                     </label>
-                    <input
-                      type="range"
-                      min="20"
-                      max="90"
-                      value={imagePositionY}
-                      onChange={(e) => onChangeImagePositionY(Number(e.target.value))}
-                      className="w-full accent-blue-600 h-3 rounded-lg"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 mt-2">
-                      <span>上</span>
-                      <span>中</span>
-                      <span>下</span>
+                    <div className="grid grid-cols-3 gap-2">
+                      {['top', 'center', 'bottom'].map((pos) => (
+                        <button
+                          key={pos}
+                          onClick={() => onChangeImagePositionY(pos)}
+                          className={`px-3 py-2 rounded-lg border-2 transition-all duration-300 text-sm font-medium ${
+                            imagePositionY === pos
+                              ? 'border-blue-500 bg-blue-50 text-blue-700'
+                              : 'border-gray-200 text-gray-600 hover:border-blue-300'
+                          }`}
+                        >
+                          {pos === 'top' ? t('top') : pos === 'center' ? t('center') : t('bottom')}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>

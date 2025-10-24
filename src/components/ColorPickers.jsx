@@ -1,6 +1,6 @@
 import React from 'react';
 import ColorPicker from 'react-best-gradient-color-picker';
-import { colorPickerLocales } from '../constants/colorPickerLocales';
+import { useLanguage } from '../hooks/useLanguage.jsx';
 
 const pickerLightStyles = {
   body: { background: 'rgba(255,255,255,0.95)' },
@@ -30,15 +30,18 @@ const pickerLightStyles = {
 };
 
 const ColorPickers = ({ bodyValue, onBodyChange, tabValue, onTabChange }) => {
+  const { getColorPickerLocale, t } = useLanguage();
+  const colorPickerLocales = getColorPickerLocale();
+  
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
       {/* 文件夹主体颜色 */}
       <div className="space-y-4">
         <label className="flex items-center gap-3 text-sm font-bold text-gray-800">
-          <span>📁 主体颜色</span>
-          <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">支持渐变</span>
+          <span>{t('bodyColor')}</span>
+          <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">{t('supportsGradient')}</span>
           <span className="inline-flex items-center gap-1 text-xs text-gray-600">
-            预览
+            {t('preview')}
             <span className="h-3 w-7 rounded-sm ring-1 ring-gray-300" style={{ background: bodyValue }} />
           </span>
         </label>
@@ -63,10 +66,10 @@ const ColorPickers = ({ bodyValue, onBodyChange, tabValue, onTabChange }) => {
       {/* 标签颜色 */}
       <div className="space-y-4">
         <label className="flex items-center gap-3 text-sm font-bold text-gray-800">
-          <span>🏷️ 标签颜色</span>
-          <span className="text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-full">支持渐变</span>
+          <span>{t('tabColor')}</span>
+          <span className="text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-full">{t('supportsGradient')}</span>
           <span className="inline-flex items-center gap-1 text-xs text-gray-600">
-            预览
+            {t('preview')}
             <span className="h-3 w-7 rounded-sm ring-1 ring-gray-300" style={{ background: tabValue }} />
           </span>
         </label>

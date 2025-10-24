@@ -1,8 +1,10 @@
 import React from 'react';
 import { Download } from 'lucide-react';
 import { canvasToICO } from '../utils/exportIcon.js';
+import { useLanguage } from '../hooks/useLanguage.jsx';
 
 const ExportControls = ({ exportFormat, onChangeExportFormat, canvasRef, fileName }) => {
+  const { t } = useLanguage();
   const downloadImage = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -30,15 +32,15 @@ const ExportControls = ({ exportFormat, onChangeExportFormat, canvasRef, fileNam
     <div className="mt-6 w-full space-y-4">
       <div className="bg-white rounded-xl p-4 border border-gray-200/50">
         <label className="block text-sm font-semibold text-gray-700">
-          📁 导出格式
+          📁 {t('exportFormat')}
         </label>
         <select
           value={exportFormat}
           onChange={(e) => onChangeExportFormat(e.target.value)}
           className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none bg-white transition-colors text-sm lg:text-base"
         >
-          <option value="png">PNG格式 (透明背景，推荐)</option>
-          <option value="ico">ICO格式 (256x256，系统图标)</option>
+          <option value="png">{t('pngFormat')}</option>
+          <option value="ico">{t('icoFormat')}</option>
         </select>
       </div>
 
@@ -47,7 +49,7 @@ const ExportControls = ({ exportFormat, onChangeExportFormat, canvasRef, fileNam
         className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
       >
         <Download className="w-5 h-5" />
-        下载图标 ({exportFormat.toUpperCase()})
+        {t('downloadIcon')} ({exportFormat.toUpperCase()})
       </button>
     </div>
   );

@@ -1,33 +1,42 @@
 # Windows 11 文件夹图标生成器
 
+[English](README_EN.md) | 中文
+
 一个现代化的 Web 应用程序，用于创建和自定义 Windows 11 风格的文件夹图标。支持多种预设样式、自定义颜色、渐变效果和标签内容，可导出为 PNG 或 ICO 格式。
 
 ![Windows 11 文件夹生成器](https://img.shields.io/badge/Windows%2011-Folder%20Generator-blue?style=for-the-badge&logo=windows)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react)
+![Vite](https://img.shields.io/badge/Vite-5.0-646CFF?style=flat-square&logo=vite)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.0-06B6D4?style=flat-square&logo=tailwindcss)
 
 ## ✨ 功能特性
 
 ### 🎨 样式定制
 - **8种预设样式**：经典黄、深海蓝、翡翠绿、薰衣草、夕阳橙、午夜蓝、珊瑚粉、紫罗兰
 - **自定义颜色**：文件夹主体和标签页颜色完全可控
-- **渐变效果**：支持简易和高级渐变模式
-- **高光效果**：可开关的顶部高光效果，增强立体感
+- **渐变效果**：支持简易和高级渐变模式，包括线性和径向渐变
+- **高光效果**：可开关的顶部高光效果，增强立体感（默认关闭）
+- **智能吸附**：滑块在推荐尺寸（128px、256px、384px）自动吸附
 
 ### 📝 标签内容
-- **文字标签**：支持自定义文字内容和颜色
+- **文字标签**：支持自定义文字内容、颜色和字体
 - **图片标签**：支持上传自定义图片作为标签
-- **字体选择**：多种字体可选（Segoe UI、微软雅黑、苹方等）
-- **位置调节**：精确控制标签位置和大小
+- **字体选择**：多种字体可选（Segoe UI、微软雅黑、苹方、Inter等）
+- **精确定位**：独立控制文字和图片的位置、大小
+- **实时调节**：文字大小和位置实时可调
 
 ### 🔧 高级设置
 - **渐变角度**：360度自由调节渐变方向
 - **色彩调节**：色相、饱和度、亮度独立控制
-- **三点渐变**：起始、中间、结束三个控制点
+- **三点渐变**：起始、中间、结束三个控制点精确控制
+- **图标尺寸**：100px-512px连续可调，推荐256px
 - **实时预览**：所有修改即时反映在预览中
 
 ### 💾 导出功能
 - **PNG格式**：透明背景，适合一般使用
-- **ICO格式**：256x256像素，适合Windows系统图标
-- **智能缩放**：自动优化导出尺寸和居中效果
+- **ICO格式**：自动优化的Windows系统图标格式
+- **智能缩放**：自动检测内容边界并优化导出效果
+- **多尺寸支持**：支持从100px到512px的任意尺寸导出
 
 ## 🚀 快速开始
 
@@ -63,11 +72,13 @@ npm run build
 
 ## 🛠️ 技术栈
 
-- **前端框架**：React 18
-- **构建工具**：Vite
-- **样式框架**：Tailwind CSS
+- **前端框架**：React 18 + Hooks
+- **构建工具**：Vite 5.0
+- **样式框架**：Tailwind CSS 3.0
 - **图标库**：Lucide React
+- **颜色选择器**：react-best-gradient-color-picker
 - **画布绘制**：HTML5 Canvas API
+- **开发语言**：JavaScript (ES6+)
 
 ## 📖 使用指南
 
@@ -111,16 +122,34 @@ npm run build
 ## 🎯 项目结构
 
 ```
-win11icon/
+win11-folder-icon-generator/
 ├── src/
-│   ├── index.css          # 全局样式
-│   └── main.jsx           # 应用入口
-├── App.jsx                # 主组件
+│   ├── components/        # React 组件
+│   │   ├── ColorPickers.jsx
+│   │   ├── ExportControls.jsx
+│   │   ├── Preview.jsx
+│   │   └── panels/        # 控制面板组件
+│   │       ├── BasicSettings.jsx
+│   │       ├── ColorControls.jsx
+│   │       ├── IconSizeControl.jsx
+│   │       └── LabelControls.jsx
+│   ├── constants/         # 常量配置
+│   │   ├── colorPickerLocales.js
+│   │   └── presetStyles.js
+│   ├── utils/             # 工具函数
+│   │   ├── canvasDraw.js
+│   │   ├── colors.js
+│   │   ├── exportIcon.js
+│   │   └── gradients.js
+│   ├── App.jsx            # 主组件
+│   ├── main.jsx           # 应用入口
+│   └── index.css          # 全局样式
 ├── index.html             # HTML模板
 ├── package.json           # 项目配置
 ├── tailwind.config.js     # Tailwind配置
 ├── vite.config.js         # Vite配置
-└── README.md              # 项目文档
+├── README.md              # 中文文档
+└── README_EN.md           # 英文文档
 ```
 
 ## 🔧 配置说明
@@ -142,6 +171,19 @@ win11icon/
 5. 开启 Pull Request
 
 ## 📝 更新日志
+
+### v1.2.0 (最新)
+- 🎯 修复滑块与推荐尺寸标注对齐问题
+- ⚡ 高光效果默认关闭，提升性能
+- 🎨 优化颜色选择器界面和交互
+- 📐 改进图标尺寸控制的精确度
+- 🔧 增强文字和图片位置调节功能
+
+### v1.1.0
+- 🎨 新增智能吸附功能
+- 📝 改进标签控制面板
+- 🔧 优化渐变效果算法
+- 💾 增强ICO导出质量
 
 ### v1.0.0
 - ✨ 初始版本发布

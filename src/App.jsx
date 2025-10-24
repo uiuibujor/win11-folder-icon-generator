@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Download, RefreshCw, Folder, Camera, Upload, X } from 'lucide-react';
+import { Download, RefreshCw, Folder, Camera, Upload, X, Languages } from 'lucide-react';
 import ColorPickers from './components/ColorPickers.jsx';
 import Preview from './components/Preview.jsx';
 import ExportControls from './components/ExportControls.jsx';
@@ -11,12 +11,15 @@ import { getFillStyle, parseGradientOrColor } from './utils/gradients.js';
 import { canvasToICO } from './utils/exportIcon.js';
 import { calculateHslShifts, getCurrentColor, adjustBrightness, rgbToHex, parseColor } from './utils/colors.js';
 import { buildPresetStyles } from './constants/presetStyles.js';
+import { useLanguage } from './hooks/useLanguage.jsx';
 
 
 const Win11FolderGenerator = () => {
+  const { t, toggleLanguage, language, isZh } = useLanguage();
+  
   const [folderColor, setFolderColor] = useState('#FFC83D');
   const [tabColor, setTabColor] = useState('#FFD666');
-  const [labelText, setLabelText] = useState('我的文件夹');
+  const [labelText, setLabelText] = useState(() => t('defaults.folderName', '我的文件夹'));
   const [labelColor, setLabelColor] = useState('#FFFFFF');
   const [showLabel, setShowLabel] = useState(true);
   const [labelMode, setLabelMode] = useState('text'); // 'text' or 'image'
@@ -366,29 +369,40 @@ const Win11FolderGenerator = () => {
   };
 
 
-  const presetStyles = buildPresetStyles(folderColor, tabColor);
+  const presetStyles = buildPresetStyles(folderColor, tabColor, t);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 p-4 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* 头部区域 - 优化间距和视觉效果 */}
         <div className="text-center mb-8 lg:mb-12">
-          <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="flex items-center justify-center gap-3 mb-4 relative">
             <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
               <Folder className="w-8 h-8 lg:w-10 lg:h-10 text-white" />
             </div>
             <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent">
-              Windows 11 文件夹图标生成器
+              {t('title')}
             </h1>
+            {/* 语言切换按钮 */}
+            <button
+              onClick={toggleLanguage}
+              className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-2 px-3 py-2 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200/50 hover:border-blue-300 hover:bg-blue-50/80 transition-all duration-300 shadow-sm hover:shadow-md"
+              title={isZh ? "Switch to English" : "切换到中文"}
+            >
+              <Languages className="w-4 h-4 text-gray-600" />
+              <span className="text-sm font-medium text-gray-700">
+                {isZh ? 'EN' : '中文'}
+              </span>
+            </button>
           </div>
-          <p className="text-gray-600 text-lg">打造专属的现代化文件夹图标，让你的桌面更加个性化</p>
+          <p className="text-gray-600 text-lg">{t('subtitle')}</p>
         </div>
 
         {/* 预设样式区域 - 改进响应式设计 */}
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6 lg:p-8 mb-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></div>
-            <h2 className="text-xl lg:text-2xl font-semibold text-gray-800">🎨 预设样式</h2>
+            <h2 className="text-xl lg:text-2xl font-semibold text-gray-800">🎨 {t('presetStylesTitle')}</h2>
           </div>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3 lg:gap-4">
             {presetStyles.map((style) => (
@@ -420,10 +434,7 @@ const Win11FolderGenerator = () => {
           {/* 预览区域 - 优化设计 */}
           <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6 lg:p-8 order-2 lg:order-1">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-gradient-to-br from-green-500 to-blue-500 rounded-lg">
-                <Camera className="w-5 h-5 text-white" />
-              </div>
-              <h2 className="text-xl lg:text-2xl font-semibold text-gray-800">📱 实时预览</h2>
+              <h2 className="text-xl lg:text-2xl font-semibold text-gray-800">📱 {t('preview')}</h2>
             </div>
             
             <div className="flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100 rounded-2xl p-6 lg:p-8 min-h-[300px] lg:min-h-[400px] border border-gray-200/50">
@@ -469,17 +480,14 @@ const Win11FolderGenerator = () => {
           {/* 控制面板 - 大幅优化设计和布局 */}
           <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-6 lg:p-8 order-1 lg:order-2">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
-                <RefreshCw className="w-5 h-5 text-white" />
-              </div>
-              <h2 className="text-xl lg:text-2xl font-semibold text-gray-800">⚙️ 自定义设置</h2>
+              <h2 className="text-xl lg:text-2xl font-semibold text-gray-800">⚙️ {t('customSettings')}</h2>
             </div>
             
             <div className="space-y-8 max-h-[600px] lg:max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
               {/* 基础设置区域 */}
               <div className="space-y-4">
                 <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                  ⚡ 基础设置
+                  ⚡ {t('basicSettings')}
                 </h3>
                 
                 <BasicSettings showHighlight={showHighlight} onToggleHighlight={setShowHighlight} />
@@ -495,7 +503,7 @@ const Win11FolderGenerator = () => {
               {/* 内容设置区域 */}
               <div className="space-y-4">
                 <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                  📝 内容设置
+                  📝 {t('contentSettings')}
                 </h3>
                 
                 <div className="space-y-4">
@@ -538,7 +546,7 @@ const Win11FolderGenerator = () => {
                   setFolderStyle('custom');
                   setBodyColorValue('#FFC83D');
                   setTabColorValue('#FFD666');
-                  setLabelText('我的文件夹');
+                  setLabelText(t('defaultText'));
                   setLabelColor('#FFFFFF');
                   setShowLabel(true);
                   setLabelMode('text');
@@ -584,8 +592,7 @@ const Win11FolderGenerator = () => {
                 }}
                 className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-700 px-6 py-4 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-lg border border-gray-300/50"
               >
-                <RefreshCw className="w-5 h-5" />
-                🔄 重置为默认设置
+                🔄 {t('resetToDefault')}
               </button>
             </div>
           </div>
@@ -597,32 +604,32 @@ const Win11FolderGenerator = () => {
             <div className="p-2 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl shadow-md">
               <span className="text-xl">💡</span>
             </div>
-            <h3 className="text-xl lg:text-2xl font-bold text-gray-800">使用小贴士</h3>
+            <h3 className="text-xl lg:text-2xl font-bold text-gray-800">{t('tips')}</h3>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-3">
               <div className="flex items-start gap-3">
                 <span className="text-blue-600 font-bold">🎨</span>
-                <span className="text-sm text-gray-700">选择预设样式或自定义渐变颜色，打造独特风格</span>
+                <span className="text-sm text-gray-700">{t('tip1')}</span>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-green-600 font-bold">🏷️</span>
-                <span className="text-sm text-gray-700">添加文字标签或上传图片，让文件夹更具辨识度</span>
+                <span className="text-sm text-gray-700">{t('tip2')}</span>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-purple-600 font-bold">📐</span>
-                <span className="text-sm text-gray-700">推荐使用 256px 或 512px 尺寸，适配各种显示场景</span>
+                <span className="text-sm text-gray-700">{t('tip3')}</span>
               </div>
             </div>
             <div className="space-y-3">
 
               <div className="flex items-start gap-3">
                 <span className="text-red-600 font-bold">💾</span>
-                <span className="text-sm text-gray-700">PNG 格式支持透明背景，ICO 格式可直接用作系统图标</span>
+                <span className="text-sm text-gray-700">{t('tip4')}</span>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-cyan-600 font-bold">✨</span>
-                <span className="text-sm text-gray-700">开启高光效果让图标更加立体生动</span>
+                <span className="text-sm text-gray-700">{t('tip5')}</span>
               </div>
             </div>
           </div>
