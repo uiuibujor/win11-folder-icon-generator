@@ -71,7 +71,7 @@ export const locales = {
     
     // 导出格式
     exportFormat: '导出格式',
-    pngFormat: 'PNG格式 (透明背景，推荐)',
+    pngFormat: 'PNG格式',
     icoFormat: 'ICO格式 (256x256，系统图标)',
     downloadIcon: '下载图标',
     
@@ -160,7 +160,7 @@ export const locales = {
     
     // 导出格式
     exportFormat: 'Export Format',
-    pngFormat: 'PNG Format (Transparent background, recommended)',
+    pngFormat: 'PNG Format',
     icoFormat: 'ICO Format (256x256, system icon)',
     downloadIcon: 'Download Icon',
     
