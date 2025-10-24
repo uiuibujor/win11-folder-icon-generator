@@ -81,11 +81,19 @@ export const locales = {
       classicYellow: '经典黄',
       deepBlue: '深海蓝',
       emeraldGreen: '翡翠绿',
+      forestGreen: '森林绿',
+      oceanBlue: '海洋蓝',
+      sapphireBlue: '蓝宝石',
+      roseGold: '玫瑰金',
       lavender: '薰衣草',
       sunsetOrange: '夕阳橙',
       midnightBlue: '午夜蓝',
       coralPink: '珊瑚粉',
-      violet: '紫罗兰'
+      violet: '紫罗兰',
+      sunsetGradient: '日落渐变',
+      oceanGradient: '海洋渐变',
+      rainbowGradient: '彩虹渐变',
+      purpleGradient: '紫色渐变'
     }
   },
   
@@ -170,11 +178,19 @@ export const locales = {
       classicYellow: 'Classic Yellow',
       deepBlue: 'Deep Blue',
       emeraldGreen: 'Emerald Green',
+      forestGreen: 'Forest Green',
+      oceanBlue: 'Ocean Blue',
+      sapphireBlue: 'Sapphire Blue',
+      roseGold: 'Rose Gold',
       lavender: 'Lavender',
       sunsetOrange: 'Sunset Orange',
       midnightBlue: 'Midnight Blue',
       coralPink: 'Coral Pink',
-      violet: 'Violet'
+      violet: 'Violet',
+      sunsetGradient: 'Sunset Gradient',
+      oceanGradient: 'Ocean Gradient',
+      rainbowGradient: 'Rainbow Gradient',
+      purpleGradient: 'Purple Gradient'
     }
   }
 };
