@@ -4,6 +4,16 @@
 
 一个现代化的 Web 应用程序，用于创建和自定义 Windows 11 风格的文件夹图标。支持多种预设样式、自定义颜色、渐变效果和标签内容，可导出为 PNG 或 ICO 格式。
 
+## 🌐 在线使用
+
+**[立即使用 →](https://win11-folder-icon-generator.netlify.app/)**
+
+无需安装，直接在浏览器中使用！
+
+## 📸 预览截图
+
+![Windows 11 文件夹图标生成器预览](preview.jpg)
+
 ![Windows 11 文件夹生成器](https://img.shields.io/badge/Windows%2011-Folder%20Generator-blue?style=for-the-badge&logo=windows)
 ![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react)
 ![Vite](https://img.shields.io/badge/Vite-5.0-646CFF?style=flat-square&logo=vite)

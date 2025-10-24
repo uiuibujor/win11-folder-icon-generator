@@ -4,6 +4,16 @@ English | [中文](README.md)
 
 A modern web application for creating and customizing Windows 11-style folder icons. Supports multiple preset styles, custom colors, gradient effects, and label content, with export options for PNG or ICO formats.
 
+## 🌐 Online Demo
+
+**[Try it now →](https://win11-folder-icon-generator.netlify.app/)**
+
+No installation required, use directly in your browser!
+
+## 📸 Preview
+
+![Windows 11 Folder Icon Generator Preview](preview-en.jpg)
+
 ![Windows 11 Folder Generator](https://img.shields.io/badge/Windows%2011-Folder%20Generator-blue?style=for-the-badge&logo=windows)
 ![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react)
 ![Vite](https://img.shields.io/badge/Vite-5.0-646CFF?style=flat-square&logo=vite)
