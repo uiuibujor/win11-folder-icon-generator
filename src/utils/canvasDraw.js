@@ -17,6 +17,10 @@ export function drawFolder(ctx, config) {
     imageSize,
     imagePositionX,
     imagePositionY,
+    // 新增：文字大小与位置
+    textSize,
+    textPositionX,
+    textPositionY,
   } = config;
 
   // 基础阴影
@@ -154,10 +158,13 @@ export function drawFolder(ctx, config) {
       ctx.shadowOffsetY = 2;
 
       ctx.fillStyle = labelColor;
-      ctx.font = `bold ${iconSize * 0.08}px ${fontString}`;
+      const fontPx = iconSize * ((textSize ?? 12) / 100);
+      ctx.font = `bold ${fontPx}px ${fontString}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(labelText, iconSize * 0.5, iconSize * 0.62);
+      const tx = iconSize * ((textPositionX ?? 50) / 100);
+      const ty = iconSize * ((textPositionY ?? 62) / 100);
+      ctx.fillText(labelText, tx, ty);
     } else if (labelMode === 'image' && customImage) {
       const img = new Image();
       img.src = customImage;

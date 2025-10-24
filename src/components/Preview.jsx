@@ -17,6 +17,10 @@ const Preview = ({
   imageSize,
   imagePositionX,
   imagePositionY,
+  // 新增：文字大小与位置
+  textSize,
+  textPositionX,
+  textPositionY,
 }) => {
   const fontString = useMemo(() => {
     const selected = (fontOptions || []).find(f => f.value === fontFamily);
@@ -49,15 +53,35 @@ const Preview = ({
       imageSize,
       imagePositionX,
       imagePositionY,
+      // 新增：文字大小与位置
+      textSize,
+      textPositionX,
+      textPositionY,
     });
-  }, [canvasRef, iconSize, showHighlight, bodyFill, tabFill, showLabel, labelMode, labelText, labelColor, fontString, customImage, imageSize, imagePositionX, imagePositionY]);
+  }, [canvasRef, iconSize, showHighlight, bodyFill, tabFill, showLabel, labelMode, labelText, labelColor, fontString, customImage, imageSize, imagePositionX, imagePositionY, textSize, textPositionX, textPositionY]);
+
+  // 固定预览容器大小到最大值（512px对应的显示大小）
+  const fixedPreviewSize = 400; // 固定预览区域大小
+  const displayScale = Math.min(fixedPreviewSize / iconSize, 1); // 计算显示缩放比例
+  const displayWidth = iconSize * displayScale;
+  const displayHeight = iconSize * displayScale;
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="max-w-full h-auto drop-shadow-2xl"
-      style={{ width: `${Math.min(iconSize, 300)}px`, height: `${Math.min(iconSize, 300)}px` }}
-    />
+    <div 
+      className="flex items-center justify-center"
+      style={{ width: `${fixedPreviewSize}px`, height: `${fixedPreviewSize}px` }}
+    >
+      <canvas
+        ref={canvasRef}
+        className="drop-shadow-2xl"
+        style={{ 
+          width: `${displayWidth}px`, 
+          height: `${displayHeight}px`,
+          maxWidth: '100%',
+          maxHeight: '100%'
+        }}
+      />
+    </div>
   );
 };
 

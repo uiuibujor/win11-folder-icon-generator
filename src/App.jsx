@@ -22,13 +22,17 @@ const Win11FolderGenerator = () => {
   const [labelMode, setLabelMode] = useState('text'); // 'text' or 'image'
   const [customImage, setCustomImage] = useState(null);
   const [folderStyle, setFolderStyle] = useState('custom');
-  const [iconSize, setIconSize] = useState(200);
+  const [iconSize, setIconSize] = useState(256);
   const [imageSize, setImageSize] = useState(25); // 图片大小百分比 (相对于图标大小)
   const [imagePositionX, setImagePositionX] = useState(51); // 图片X位置百分比 (0-100)
   const [imagePositionY, setImagePositionY] = useState(60); // 图片Y位置百分比 (0-100)
   const [fontFamily, setFontFamily] = useState('Segoe UI'); // 字体选择
   const [exportFormat, setExportFormat] = useState('png'); // 导出格式选择
-  const [showHighlight, setShowHighlight] = useState(true); // 高光效果开关
+  const [showHighlight, setShowHighlight] = useState(false); // 高光效果开关
+  // 新增：标签文字大小与位置
+  const [textSize, setTextSize] = useState(8); // 文字大小百分比 (相对于图标大小)
+  const [textPositionX, setTextPositionX] = useState(50); // 文字X位置百分比 (0-100)
+  const [textPositionY, setTextPositionY] = useState(62); // 文字Y位置百分比 (0-100)
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -439,6 +443,13 @@ const Win11FolderGenerator = () => {
                 imageSize={imageSize}
                 imagePositionX={imagePositionX}
                 imagePositionY={imagePositionY}
+                // 新增：文字大小与位置
+                textSize={textSize}
+                onChangeTextSize={setTextSize}
+                textPositionX={textPositionX}
+                onChangeTextPositionX={setTextPositionX}
+                textPositionY={textPositionY}
+                onChangeTextPositionY={setTextPositionY}
               />
               
               <ExportControls
@@ -447,6 +458,11 @@ const Win11FolderGenerator = () => {
                 canvasRef={canvasRef}
                 fileName={labelText || 'folder'}
               />
+            </div>
+            
+            {/* 图标大小控制 - 独立组件 */}
+            <div className="mt-4">
+              <IconSizeControl iconSize={iconSize} onChangeIconSize={setIconSize} />
             </div>
           </div>
 
@@ -505,9 +521,14 @@ const Win11FolderGenerator = () => {
                     onChangeImagePositionX={setImagePositionX}
                     imagePositionY={imagePositionY}
                     onChangeImagePositionY={setImagePositionY}
+                    // 新增：文字大小与位置
+                    textSize={textSize}
+                    onChangeTextSize={setTextSize}
+                    textPositionX={textPositionX}
+                    onChangeTextPositionX={setTextPositionX}
+                    textPositionY={textPositionY}
+                    onChangeTextPositionY={setTextPositionY}
                   />
-
-                  <IconSizeControl iconSize={iconSize} onChangeIconSize={setIconSize} />
                 </div>
               </div>
 
@@ -522,10 +543,14 @@ const Win11FolderGenerator = () => {
                   setShowLabel(true);
                   setLabelMode('text');
                   setCustomImage(null);
-                  setIconSize(200);
+                  setIconSize(256);
                   setImageSize(25);
                   setImagePositionX(50);
                   setImagePositionY(62);
+                  // 新增重置：文字大小与位置
+                  setTextSize(8);
+                  setTextPositionX(50);
+                  setTextPositionY(62);
                   setFontFamily('Segoe UI');
                   setExportFormat('png');
                   setBodyGradAngle(90);
@@ -608,3 +633,17 @@ const Win11FolderGenerator = () => {
 };
  
  export default Win11FolderGenerator;
+
+// 在重置时也重置文字大小与位置
+const resetLabelSettings = () => {
+  setLabelText('');
+  setLabelColor('#000000');
+  setFontFamily('Inter');
+  setCustomImage(null);
+  setImageSize(40);
+  setImagePositionX(50);
+  setImagePositionY(60);
+  setTextSize(12);
+  setTextPositionX(50);
+  setTextPositionY(50);
+};

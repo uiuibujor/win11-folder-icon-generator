@@ -23,6 +23,13 @@ const LabelControls = ({
   onChangeImagePositionX,
   imagePositionY,
   onChangeImagePositionY,
+  // 新增：文字大小与位置
+  textSize,
+  onChangeTextSize,
+  textPositionX,
+  onChangeTextPositionX,
+  textPositionY,
+  onChangeTextPositionY,
 }) => {
   return (
     <div className="bg-white rounded-xl p-5 border border-gray-200/50 shadow-sm">
@@ -116,6 +123,68 @@ const LabelControls = ({
                     </option>
                   ))}
                 </select>
+              </div>
+
+              {/* 新增：文字大小与位置控制 */}
+              <div className="space-y-4 bg-gray-50 rounded-xl p-4">
+                <div>
+                  <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
+                    📏 文字大小
+                    <span className="text-blue-600 font-semibold">{textSize}%</span>
+                  </label>
+                  <input
+                    type="range"
+                    min="6"
+                    max="24"
+                    value={textSize}
+                    onChange={(e) => onChangeTextSize(Number(e.target.value))}
+                    className="w-full accent-blue-600 h-2 rounded-lg"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-2">
+                    <span>小 (6%)</span>
+                    <span>大 (24%)</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
+                    ↔️ 水平位置
+                    <span className="text-blue-600 font-semibold">{textPositionX}%</span>
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={textPositionX}
+                    onChange={(e) => onChangeTextPositionX(Number(e.target.value))}
+                    className="w-full accent-blue-600 h-2 rounded-lg"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-2">
+                    <span>左</span>
+                    <span>中</span>
+                    <span>右</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
+                    ↕️ 垂直位置
+                    <span className="text-blue-600 font-semibold">{textPositionY}%</span>
+                  </label>
+                  <input
+                    type="range"
+                    min="20"
+                    max="90"
+                    value={textPositionY}
+                    onChange={(e) => onChangeTextPositionY(Number(e.target.value))}
+                    className="w-full accent-blue-600 h-3 rounded-lg"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-2">
+                    <span>上</span>
+                    <span>中</span>
+                    <span>下</span>
+                  </div>
+                </div>
               </div>
             </div>
           ) : (
