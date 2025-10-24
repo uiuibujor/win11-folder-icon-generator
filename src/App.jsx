@@ -1,9 +1,16 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Download, RefreshCw, Folder, Camera, Upload, X } from 'lucide-react';
 import ColorPickers from './components/ColorPickers.jsx';
+import Preview from './components/Preview.jsx';
+import ExportControls from './components/ExportControls.jsx';
+import BasicSettings from './components/panels/BasicSettings.jsx';
+import ColorControls from './components/panels/ColorControls.jsx';
+import LabelControls from './components/panels/LabelControls.jsx';
+import IconSizeControl from './components/panels/IconSizeControl.jsx';
 import { getFillStyle, parseGradientOrColor } from './utils/gradients.js';
 import { canvasToICO } from './utils/exportIcon.js';
 import { calculateHslShifts, getCurrentColor, adjustBrightness, rgbToHex, parseColor } from './utils/colors.js';
+import { buildPresetStyles } from './constants/presetStyles.js';
 
 
 const Win11FolderGenerator = () => {
@@ -354,46 +361,8 @@ const Win11FolderGenerator = () => {
     }
   };
 
-  React.useEffect(() => {
-    drawFolder();
-  }, [
-    folderColor, tabColor,
-    labelText, labelColor, showLabel, labelMode, customImage,
-    folderStyle, iconSize,
-    imageSize, imagePositionX, imagePositionY,
-    fontFamily, showHighlight,
-    bodyGradAngle, bodyHueShift, bodySatShift, bodyLightShift,
-    tabGradAngle, tabHueShift, tabSatShift, tabLightShift,
-    bodyStartHueShift, bodyStartSatShift, bodyStartLightShift,
-    bodyMidStop, bodyMidHueShift, bodyMidSatShift, bodyMidLightShift,
-    tabStartHueShift, tabStartSatShift, tabStartLightShift,
-    tabMidStop, tabMidHueShift, tabMidSatShift, tabMidLightShift,
-    memoizedBodyColorValue, memoizedTabColorValue
-  ]);
 
-  const presetStyles = [
-    { name: '经典黄', value: 'classic', bodyColor: '#FFC83D', tabColor: '#e6a800' },
-    { name: '深海蓝', value: 'ocean', bodyColor: '#667EEA', tabColor: '#764BA2' },
-    { name: '翡翠绿', value: 'forest', bodyColor: '#11998E', tabColor: '#38EF7D' },
-    { name: '薰衣草', value: 'lavender', bodyColor: '#A8EDEA', tabColor: '#FED6E3' },
-    { name: '夕阳橙', value: 'sunset', bodyColor: '#FF6B6B', tabColor: '#FFE66D' },
-    { name: '午夜蓝', value: 'midnight', bodyColor: '#2C3E50', tabColor: '#4CA1AF' },
-    { name: '珊瑚粉', value: 'coral', bodyColor: '#FF7F7F', tabColor: '#FFBF7F' },
-    { name: '祖母绿', value: 'emerald', bodyColor: '#50C878', tabColor: '#98FB98' },
-    { name: '玫瑰红', value: 'rose', bodyColor: '#FF69B4', tabColor: '#FFB6C1' },
-    { name: '蓝宝石', value: 'sapphire', bodyColor: '#0F52BA', tabColor: '#6495ED' },
-    { name: '琥珀金', value: 'amber', bodyColor: '#FFBF00', tabColor: '#FFD700' },
-    { name: '薄荷绿', value: 'mint', bodyColor: '#98FB98', tabColor: '#F0FFF0' },
-    { name: '梅子紫', value: 'plum', bodyColor: '#8E4585', tabColor: '#DDA0DD' },
-    { name: '天空蓝', value: 'sky', bodyColor: '#87CEEB', tabColor: '#E0F6FF' },
-    { name: '樱桃红', value: 'cherry', bodyColor: '#DE3163', tabColor: '#FFB7C5' },
-    { name: '鼠尾草', value: 'sage', bodyColor: '#9CAF88', tabColor: '#C8D5B9' },
-    { name: '珍珠白', value: 'pearl', bodyColor: '#F8F6F0', tabColor: '#FFFDD0' },
-    { name: '青铜色', value: 'bronze', bodyColor: '#CD7F32', tabColor: '#D2B48C' },
-    { name: '鸢尾紫', value: 'iris', bodyColor: '#5D4E75', tabColor: '#9B59B6' },
-    { name: '奶油色', value: 'cream', bodyColor: '#FFFDD0', tabColor: '#FFF8DC' },
-    { name: '自定义', value: 'custom', bodyColor: folderColor, tabColor: tabColor }
-  ];
+  const presetStyles = buildPresetStyles(folderColor, tabColor);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 p-4 lg:p-8">
@@ -454,36 +423,30 @@ const Win11FolderGenerator = () => {
             </div>
             
             <div className="flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100 rounded-2xl p-6 lg:p-8 min-h-[300px] lg:min-h-[400px] border border-gray-200/50">
-              <canvas
-                ref={canvasRef}
-                className="max-w-full h-auto drop-shadow-2xl"
-                style={{ width: `${Math.min(iconSize, 300)}px`, height: `${Math.min(iconSize, 300)}px` }}
+              <Preview
+                canvasRef={canvasRef}
+                iconSize={iconSize}
+                showHighlight={showHighlight}
+                bodyFill={memoizedBodyColorValue}
+                tabFill={memoizedTabColorValue}
+                showLabel={showLabel}
+                labelMode={labelMode}
+                labelText={labelText}
+                labelColor={labelColor}
+                fontFamily={fontFamily}
+                fontOptions={fontOptions}
+                customImage={customImage}
+                imageSize={imageSize}
+                imagePositionX={imagePositionX}
+                imagePositionY={imagePositionY}
               />
               
-              {/* 导出控制区域 - 改进设计 */}
-              <div className="mt-6 w-full space-y-4">
-                <div className="bg-white rounded-xl p-4 border border-gray-200/50">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    📁 导出格式
-                  </label>
-                  <select
-                    value={exportFormat}
-                    onChange={(e) => setExportFormat(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none bg-white transition-colors text-sm lg:text-base"
-                  >
-                    <option value="png">PNG格式 (透明背景，推荐)</option>
-                    <option value="ico">ICO格式 (256x256，系统图标)</option>
-                  </select>
-                </div>
-                
-                <button
-                  onClick={downloadImage}
-                  className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  <Download className="w-5 h-5" />
-                  下载图标 ({exportFormat.toUpperCase()})
-                </button>
-              </div>
+              <ExportControls
+                exportFormat={exportFormat}
+                onChangeExportFormat={setExportFormat}
+                canvasRef={canvasRef}
+                fileName={labelText || 'folder'}
+              />
             </div>
           </div>
 
@@ -503,36 +466,15 @@ const Win11FolderGenerator = () => {
                   ⚡ 基础设置
                 </h3>
                 
-                {/* 高光效果开关 */}
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-200/50">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={showHighlight}
-                      onChange={(e) => setShowHighlight(e.target.checked)}
-                      className="w-5 h-5 accent-blue-600 rounded"
-                    />
-                    <span className="text-sm font-semibold text-gray-700">✨ 显示高光效果</span>
-                  </label>
-                </div>
+                <BasicSettings showHighlight={showHighlight} onToggleHighlight={setShowHighlight} />
               </div>
 
-              {/* 颜色自定义区域 */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                  🎨 颜色自定义
-                </h3>
-                
-                {/* 并排布局的颜色选择器 */}
-                <div className="bg-white rounded-2xl p-6 border-2 border-gradient-to-r from-blue-200/50 to-purple-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <ColorPickers
-                    bodyValue={bodyColorValue}
-                    onBodyChange={handleBodyColorChange}
-                    tabValue={tabColorValue}
-                    onTabChange={handleTabColorChange}
-                  />
-                </div>
-              </div>
+              <ColorControls
+                bodyValue={bodyColorValue}
+                onBodyChange={handleBodyColorChange}
+                tabValue={tabColorValue}
+                onTabChange={handleTabColorChange}
+              />
 
               {/* 内容设置区域 */}
               <div className="space-y-4">
@@ -541,224 +483,31 @@ const Win11FolderGenerator = () => {
                 </h3>
                 
                 <div className="space-y-4">
-                  {/* 标签内容区域 */}
-                  <div className="bg-white rounded-xl p-5 border border-gray-200/50 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                        🏷️ 标签内容
-                      </label>
-                      <label className="flex items-center gap-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={showLabel}
-                          onChange={(e) => setShowLabel(e.target.checked)}
-                          className="w-5 h-5 accent-blue-600 rounded"
-                        />
-                        <span className="text-sm font-medium text-gray-600">显示标签</span>
-                      </label>
-                    </div>
-                    
-                    {showLabel && (
-                      <div className="space-y-4">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => setLabelMode('text')}
-                            className={`flex-1 px-4 py-3 rounded-xl border-2 transition-all duration-300 font-medium ${
-                              labelMode === 'text'
-                                ? 'border-blue-500 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 shadow-md'
-                                : 'border-gray-200 text-gray-600 hover:border-blue-300 hover:bg-blue-50'
-                            }`}
-                          >
-                            📝 文字
-                          </button>
-                          <button
-                            onClick={() => setLabelMode('image')}
-                            className={`flex-1 px-4 py-3 rounded-xl border-2 transition-all duration-300 font-medium ${
-                              labelMode === 'image'
-                                ? 'border-blue-500 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 shadow-md'
-                                : 'border-gray-200 text-gray-600 hover:border-blue-300 hover:bg-blue-50'
-                            }`}
-                          >
-                            🖼️ 图片
-                          </button>
-                        </div>
+                  <LabelControls
+                    showLabel={showLabel}
+                    onToggleShowLabel={setShowLabel}
+                    labelMode={labelMode}
+                    onChangeLabelMode={setLabelMode}
+                    labelText={labelText}
+                    onChangeLabelText={setLabelText}
+                    labelColor={labelColor}
+                    onChangeLabelColor={setLabelColor}
+                    fontFamily={fontFamily}
+                    onChangeFontFamily={setFontFamily}
+                    fontOptions={fontOptions}
+                    fileInputRef={fileInputRef}
+                    handleImageUpload={handleImageUpload}
+                    removeImage={removeImage}
+                    customImage={customImage}
+                    imageSize={imageSize}
+                    onChangeImageSize={setImageSize}
+                    imagePositionX={imagePositionX}
+                    onChangeImagePositionX={setImagePositionX}
+                    imagePositionY={imagePositionY}
+                    onChangeImagePositionY={setImagePositionY}
+                  />
 
-                        {labelMode === 'text' ? (
-                          <div className="space-y-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                📝 标签文字
-                              </label>
-                              <input
-                                type="text"
-                                value={labelText}
-                                onChange={(e) => setLabelText(e.target.value)}
-                                placeholder="输入文字..."
-                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors"
-                              />
-                            </div>
-                            
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-3">
-                                🎨 文字颜色
-                              </label>
-                              <div className="flex items-center gap-3">
-                                <input
-                                  type="color"
-                                  value={labelColor}
-                                  onChange={(e) => setLabelColor(e.target.value)}
-                                  className="w-16 h-12 rounded-xl border-2 border-gray-200 cursor-pointer shadow-sm"
-                                />
-                                <input
-                                  type="text"
-                                  value={labelColor}
-                                  onChange={(e) => setLabelColor(e.target.value)}
-                                  className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors"
-                                />
-                              </div>
-                            </div>
-                            
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-3">
-                                🔤 字体选择
-                              </label>
-                              <select
-                                value={fontFamily}
-                                onChange={(e) => setFontFamily(e.target.value)}
-                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none bg-white transition-colors"
-                              >
-                                {fontOptions.map((font) => (
-                                  <option key={font.value} value={font.value}>
-                                    {font.name}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="space-y-4">
-                            <input
-                              ref={fileInputRef}
-                              type="file"
-                              accept="image/*"
-                              onChange={handleImageUpload}
-                              className="hidden"
-                              id="image-upload"
-                            />
-                            {!customImage ? (
-                              <label
-                                htmlFor="image-upload"
-                                className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 transition-all duration-300 group"
-                              >
-                                <Upload className="w-10 h-10 text-gray-400 group-hover:text-blue-500 mb-3 transition-colors" />
-                                <span className="text-sm font-medium text-gray-600 group-hover:text-blue-600">点击上传图片</span>
-                                <span className="text-xs text-gray-400 mt-1">支持 JPG、PNG、GIF 格式</span>
-                              </label>
-                            ) : (
-                              <div className="relative">
-                                <img
-                                  src={customImage}
-                                  alt="Preview"
-                                  className="w-full h-40 object-cover rounded-xl border-2 border-gray-200 shadow-sm"
-                                />
-                                <button
-                                  onClick={removeImage}
-                                  className="absolute top-3 right-3 p-2 bg-red-500 hover:bg-red-600 text-white rounded-full transition-all shadow-lg hover:shadow-xl"
-                                >
-                                  <X className="w-4 h-4" />
-                                </button>
-                              </div>
-                            )}
-                            
-                            {/* 图片控制区域 */}
-                            {customImage && (
-                              <div className="space-y-4 bg-gray-50 rounded-xl p-4">
-                                <div>
-                                  <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
-                                    📏 图片大小
-                                    <span className="text-blue-600 font-semibold">{imageSize}%</span>
-                                  </label>
-                                  <input
-                                    type="range"
-                                    min="10"
-                                    max="80"
-                                    value={imageSize}
-                                    onChange={(e) => setImageSize(Number(e.target.value))}
-                                    className="w-full accent-blue-600 h-2 rounded-lg"
-                                  />
-                                  <div className="flex justify-between text-xs text-gray-500 mt-2">
-                                    <span>小 (10%)</span>
-                                    <span>大 (80%)</span>
-                                  </div>
-                                </div>
-                                
-                                <div>
-                                  <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
-                                    ↔️ 水平位置
-                                    <span className="text-blue-600 font-semibold">{imagePositionX}%</span>
-                                  </label>
-                                  <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={imagePositionX}
-                                    onChange={(e) => setImagePositionX(Number(e.target.value))}
-                                    className="w-full accent-blue-600 h-2 rounded-lg"
-                                  />
-                                  <div className="flex justify-between text-xs text-gray-500 mt-2">
-                                    <span>左</span>
-                                    <span>中</span>
-                                    <span>右</span>
-                                  </div>
-                                </div>
-                                
-                                <div>
-                                  <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
-                                    ↕️ 垂直位置
-                                    <span className="text-blue-600 font-semibold">{imagePositionY}%</span>
-                                  </label>
-                                  <input
-                                    type="range"
-                                    min="20"
-                                    max="90"
-                                    value={imagePositionY}
-                                    onChange={(e) => setImagePositionY(Number(e.target.value))}
-                                    className="w-full accent-blue-600 h-3 rounded-lg"
-                                  />
-                                  <div className="flex justify-between text-xs text-gray-500 mt-2">
-                                    <span>上</span>
-                                    <span>中</span>
-                                    <span>下</span>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 图标大小控制 */}
-                  <div className="bg-white rounded-xl p-5 border border-gray-200/50 shadow-sm">
-                    <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-4">
-                      📐 图标大小
-                      <span className="text-blue-600 font-bold text-lg">{iconSize}px</span>
-                    </label>
-                    <input
-                      type="range"
-                      min="100"
-                      max="400"
-                      value={iconSize}
-                      onChange={(e) => setIconSize(Number(e.target.value))}
-                      className="w-full accent-blue-600 h-3 rounded-lg"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 mt-3">
-                      <span>小图标 (100px)</span>
-                      <span>推荐 (256px)</span>
-                      <span>大图标 (400px)</span>
-                    </div>
-                  </div>
+                  <IconSizeControl iconSize={iconSize} onChangeIconSize={setIconSize} />
                 </div>
               </div>
 
