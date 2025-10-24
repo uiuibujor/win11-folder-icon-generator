@@ -48,7 +48,7 @@ A modern web application for creating and customizing Windows 11-style folder ic
 
 1. **Clone the repository**
 ```bash
-git clone <repository-url>
+git clone https://github.com/uiuibujor/win11-folder-icon-generator
 cd win11-folder-icon-generator
 ```
 

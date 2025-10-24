@@ -48,8 +48,8 @@
 
 1. **克隆项目**
 ```bash
-git clone <repository-url>
-cd win11icon
+git clone https://github.com/uiuibujor/win11-folder-icon-generator
+cd win11-folder-icon-generator
 ```
 
 2. **安装依赖**
