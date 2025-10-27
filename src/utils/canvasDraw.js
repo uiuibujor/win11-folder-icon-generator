@@ -17,6 +17,7 @@ export function drawFolder(ctx, config) {
     imageSize,
     imagePositionX,
     imagePositionY,
+    clipImageToBody,
     // 新增：文字大小与位置
     textSize,
     textPositionX,
@@ -173,10 +174,47 @@ export function drawFolder(ctx, config) {
         ctx.shadowBlur = 5;
         ctx.shadowOffsetY = 2;
 
-        const sizePx = iconSize * (imageSize / 100);
-        const imgX = iconSize * (imagePositionX / 100) - sizePx / 2;
-        const imgY = iconSize * (imagePositionY / 100) - sizePx / 2;
-        ctx.drawImage(img, imgX, imgY, sizePx, sizePx);
+        // 将 imageSize 视为最大边界框尺寸，绘制时保持长宽比（contain）
+        const boxSize = iconSize * (imageSize / 100);
+        const posX = typeof imagePositionX === 'string'
+          ? (imagePositionX === 'left' ? 30 : imagePositionX === 'right' ? 70 : 50)
+          : imagePositionX;
+        const posY = typeof imagePositionY === 'string'
+          ? (imagePositionY === 'top' ? 40 : imagePositionY === 'bottom' ? 80 : 60)
+          : imagePositionY;
+        const centerX = iconSize * (posX / 100);
+        const centerY = iconSize * (posY / 100);
+        const aspect = img.width / img.height;
+        const drawW = aspect >= 1 ? boxSize : boxSize * aspect;
+        const drawH = aspect >= 1 ? boxSize / aspect : boxSize;
+        const drawX = centerX - drawW / 2;
+        const drawY = centerY - drawH / 2;
+        if (clipImageToBody) {
+          ctx.save();
+          ctx.beginPath();
+          // 使用主体相同路径作为裁剪区域
+          ctx.moveTo(x + radius, leftTopY);
+          ctx.lineTo(transitionStart, leftTopY);
+          const hcp1X = transitionStart + slopeLength * 0.35;
+          const hcp1Y = leftTopY;
+          const hcp2X = transitionStart + slopeLength * 0.75;
+          const hcp2Y = rightTopY;
+          ctx.bezierCurveTo(hcp1X, hcp1Y, hcp2X, hcp2Y, transitionEnd, rightTopY);
+          ctx.lineTo(x + width - radius, rightTopY);
+          ctx.quadraticCurveTo(x + width, rightTopY, x + width, rightTopY + radius);
+          ctx.lineTo(x + width, y + height - radius);
+          ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+          ctx.lineTo(x + radius, y + height);
+          ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+          ctx.lineTo(x, leftTopY + radius);
+          ctx.quadraticCurveTo(x, leftTopY, x + radius, leftTopY);
+          ctx.closePath();
+          ctx.clip();
+          ctx.drawImage(img, drawX, drawY, drawW, drawH);
+          ctx.restore();
+        } else {
+          ctx.drawImage(img, drawX, drawY, drawW, drawH);
+        }
       };
     }
   }

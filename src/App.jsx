@@ -33,6 +33,8 @@ const Win11FolderGenerator = () => {
   const [exportFormat, setExportFormat] = useState('png'); // 导出格式选择
   const [showHighlight, setShowHighlight] = useState(false); // 高光效果开关
   const [presetCollapsed, setPresetCollapsed] = useState(true); // 预设样式栏收缩状态
+  // 图片遮罩：限制图片在文件夹主体内
+  const [clipImageToBody, setClipImageToBody] = useState(false);
   // 新增：标签文字大小与位置
   const [textSize, setTextSize] = useState(8); // 文字大小百分比 (相对于图标大小)
   const [textPositionX, setTextPositionX] = useState(50); // 文字X位置百分比 (0-100)
@@ -475,6 +477,7 @@ const Win11FolderGenerator = () => {
                 imageSize={imageSize}
                 imagePositionX={imagePositionX}
                 imagePositionY={imagePositionY}
+                clipImageToBody={clipImageToBody}
                 // 新增：文字大小与位置
                 textSize={textSize}
                 onChangeTextSize={setTextSize}
@@ -549,15 +552,17 @@ const Win11FolderGenerator = () => {
                     imagePositionX={imagePositionX}
                     onChangeImagePositionX={setImagePositionX}
                     imagePositionY={imagePositionY}
-                    onChangeImagePositionY={setImagePositionY}
-                    // 新增：文字大小与位置
-                    textSize={textSize}
-                    onChangeTextSize={setTextSize}
-                    textPositionX={textPositionX}
-                    onChangeTextPositionX={setTextPositionX}
-                    textPositionY={textPositionY}
-                    onChangeTextPositionY={setTextPositionY}
-                  />
+                  onChangeImagePositionY={setImagePositionY}
+                  clipImageToBody={clipImageToBody}
+                  onToggleClipImageToBody={setClipImageToBody}
+                  // 新增：文字大小与位置
+                  textSize={textSize}
+                  onChangeTextSize={setTextSize}
+                  textPositionX={textPositionX}
+                  onChangeTextPositionX={setTextPositionX}
+                  textPositionY={textPositionY}
+                  onChangeTextPositionY={setTextPositionY}
+                />
                 </div>
               </div>
 
@@ -606,6 +611,7 @@ const Win11FolderGenerator = () => {
                   setTabMidHueShift(0);
                   setTabMidSatShift(0);
                   setTabMidLightShift(3);
+                  setClipImageToBody(false);
 
                   if (fileInputRef.current) {
                     fileInputRef.current.value = '';

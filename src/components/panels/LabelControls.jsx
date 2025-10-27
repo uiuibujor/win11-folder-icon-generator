@@ -24,6 +24,9 @@ const LabelControls = ({
   onChangeImagePositionX,
   imagePositionY,
   onChangeImagePositionY,
+  // 图片遮罩开关
+  clipImageToBody,
+  onToggleClipImageToBody,
   // 新增：文字大小与位置
   textSize,
   onChangeTextSize,
@@ -227,9 +230,24 @@ const LabelControls = ({
 
               {customImage && (
                 <div className="space-y-4 bg-gray-50 rounded-xl p-4">
+                  {/* 图片遮罩：限制图片在文件夹主体内 */}
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                      🧩 {t('clipImageToBody')}
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={clipImageToBody}
+                        onChange={(e) => onToggleClipImageToBody(e.target.checked)}
+                        className="w-5 h-5 accent-blue-600 rounded"
+                      />
+                    </label>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-3">
-                      📏 {t('imageSize')}
+                      {t('imageSize')}
                     </label>
                     <div className="flex items-center gap-3">
                       <span className="text-sm text-gray-500 min-w-[50px]">{t('smallImageSize')}</span>
@@ -249,44 +267,46 @@ const LabelControls = ({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                    <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
                       ↔️ {t('horizontalPosition')}
+                      <span className="text-blue-600 font-semibold">
+                        {typeof imagePositionX === 'number' ? imagePositionX : imagePositionX === 'left' ? 30 : imagePositionX === 'right' ? 70 : 50}%
+                      </span>
                     </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {['left', 'center', 'right'].map((pos) => (
-                        <button
-                          key={pos}
-                          onClick={() => onChangeImagePositionX(pos)}
-                          className={`px-3 py-2 rounded-lg border-2 transition-all duration-300 text-sm font-medium ${
-                            imagePositionX === pos
-                              ? 'border-blue-500 bg-blue-50 text-blue-700'
-                              : 'border-gray-200 text-gray-600 hover:border-blue-300'
-                          }`}
-                        >
-                          {pos === 'left' ? t('left') : pos === 'center' ? t('center') : t('right')}
-                        </button>
-                      ))}
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={typeof imagePositionX === 'number' ? imagePositionX : imagePositionX === 'left' ? 30 : imagePositionX === 'right' ? 70 : 50}
+                      onChange={(e) => onChangeImagePositionX(Number(e.target.value))}
+                      className="w-full accent-blue-600 h-2 rounded-lg"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500 mt-2">
+                      <span>{t('left')}</span>
+                      <span>{t('center')}</span>
+                      <span>{t('right')}</span>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                    <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
                       ↕️ {t('verticalPosition')}
+                      <span className="text-blue-600 font-semibold">
+                        {typeof imagePositionY === 'number' ? imagePositionY : imagePositionY === 'top' ? 40 : imagePositionY === 'bottom' ? 80 : 60}%
+                      </span>
                     </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {['top', 'center', 'bottom'].map((pos) => (
-                        <button
-                          key={pos}
-                          onClick={() => onChangeImagePositionY(pos)}
-                          className={`px-3 py-2 rounded-lg border-2 transition-all duration-300 text-sm font-medium ${
-                            imagePositionY === pos
-                              ? 'border-blue-500 bg-blue-50 text-blue-700'
-                              : 'border-gray-200 text-gray-600 hover:border-blue-300'
-                          }`}
-                        >
-                          {pos === 'top' ? t('top') : pos === 'center' ? t('center') : t('bottom')}
-                        </button>
-                      ))}
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={typeof imagePositionY === 'number' ? imagePositionY : imagePositionY === 'top' ? 40 : imagePositionY === 'bottom' ? 80 : 60}
+                      onChange={(e) => onChangeImagePositionY(Number(e.target.value))}
+                      className="w-full accent-blue-600 h-2 rounded-lg"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500 mt-2">
+                      <span>{t('top')}</span>
+                      <span>{t('center')}</span>
+                      <span>{t('bottom')}</span>
                     </div>
                   </div>
                 </div>

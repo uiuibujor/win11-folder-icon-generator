@@ -17,6 +17,7 @@ const Preview = ({
   imageSize,
   imagePositionX,
   imagePositionY,
+  clipImageToBody,
   // 新增：文字大小与位置
   textSize,
   textPositionX,
@@ -53,12 +54,13 @@ const Preview = ({
       imageSize,
       imagePositionX,
       imagePositionY,
+      clipImageToBody,
       // 新增：文字大小与位置
       textSize,
       textPositionX,
       textPositionY,
     });
-  }, [canvasRef, iconSize, showHighlight, bodyFill, tabFill, showLabel, labelMode, labelText, labelColor, fontString, customImage, imageSize, imagePositionX, imagePositionY, textSize, textPositionX, textPositionY]);
+  }, [canvasRef, iconSize, showHighlight, bodyFill, tabFill, showLabel, labelMode, labelText, labelColor, fontString, customImage, imageSize, imagePositionX, imagePositionY, clipImageToBody, textSize, textPositionX, textPositionY]);
 
   // 固定预览容器大小到最大值（512px对应的显示大小）
   const fixedPreviewSize = 400; // 固定预览区域大小

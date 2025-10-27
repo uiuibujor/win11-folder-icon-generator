@@ -62,6 +62,7 @@ export const locales = {
     imageSize: '📏 图片大小',
     smallImageSize: '小 (10%)',
     largeImageSize: '大 (80%)',
+    clipImageToBody: '将图片限制在文件夹主体内',
     
     // 图标尺寸
     iconSize: '图标大小',
@@ -159,6 +160,7 @@ export const locales = {
     imageSize: '📏 Image Size',
     smallImageSize: 'Small (10%)',
     largeImageSize: 'Large (80%)',
+    clipImageToBody: 'Clip image inside folder body',
     
     // 图标尺寸
     iconSize: 'Icon Size',
