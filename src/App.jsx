@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Download, RefreshCw, Folder, Camera, Upload, X, Languages } from 'lucide-react';
+import { Download, RefreshCw, Folder, Camera, Upload, X, Languages, ChevronDown } from 'lucide-react';
 import ColorPickers from './components/ColorPickers.jsx';
 import Preview from './components/Preview.jsx';
 import ExportControls from './components/ExportControls.jsx';
@@ -32,6 +32,7 @@ const Win11FolderGenerator = () => {
   const [fontFamily, setFontFamily] = useState('Segoe UI'); // 字体选择
   const [exportFormat, setExportFormat] = useState('png'); // 导出格式选择
   const [showHighlight, setShowHighlight] = useState(false); // 高光效果开关
+  const [presetCollapsed, setPresetCollapsed] = useState(true); // 预设样式栏收缩状态
   // 新增：标签文字大小与位置
   const [textSize, setTextSize] = useState(8); // 文字大小百分比 (相对于图标大小)
   const [textPositionX, setTextPositionX] = useState(50); // 文字X位置百分比 (0-100)
@@ -403,8 +404,27 @@ const Win11FolderGenerator = () => {
           <div className="flex items-center gap-3 mb-6">
             <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></div>
             <h2 className="text-xl lg:text-2xl font-semibold text-gray-800">🎨 {t('presetStylesTitle')}</h2>
+            <button
+              onClick={() => setPresetCollapsed(prev => !prev)}
+              aria-expanded={!presetCollapsed}
+              className={`ml-auto flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-300 shadow-sm hover:shadow-md border ${
+                presetCollapsed
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white border-blue-600 hover:from-blue-700 hover:to-purple-700'
+                  : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white border-purple-600 hover:from-purple-700 hover:to-blue-700'
+              }`}
+              title={isZh ? (presetCollapsed ? '展开预设' : '收起预设') : (presetCollapsed ? 'Show Presets' : 'Hide Presets')}
+            >
+              <ChevronDown className={`w-4 h-4 text-white transition-transform ${presetCollapsed ? '' : 'rotate-180'}`} />
+              <span className="text-sm font-semibold">
+                {isZh ? (presetCollapsed ? '展开预设' : '收起预设') : (presetCollapsed ? 'Show Presets' : 'Hide Presets')}
+              </span>
+              <span className="ml-1 px-2 py-0.5 rounded-full bg-white/20 text-xs">{presetStyles.length}</span>
+            </button>
           </div>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3 lg:gap-4">
+          {presetCollapsed && (
+            <p className="-mt-2 mb-4 text-xs text-gray-600">{isZh ? '已收起，点击右侧按钮展开查看所有预设' : 'Collapsed. Click the button to show all presets.'}</p>
+          )}
+          <div className={`grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 xl:grid-cols-14 gap-2 lg:gap-3 ${presetCollapsed ? 'hidden' : ''}`}>
             {presetStyles.map((style) => (
               <button
                 key={style.value}
@@ -412,18 +432,19 @@ const Win11FolderGenerator = () => {
                   setFolderStyle(style.value);
                   setBodyColorValue(style.bodyColor);
                   setTabColorValue(style.tabColor);
+                  if (style.value !== 'custom') setPresetCollapsed(false);
                 }}
-                className={`group flex flex-col items-center p-3 lg:p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                className={`group flex flex-col items-center p-2 lg:p-3 rounded-xl border-2 transition-all duration-300 hover:scale-105 hover:shadow-lg ${
                   folderStyle === style.value
                     ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-purple-50 shadow-lg scale-105'
                     : 'border-gray-200 hover:border-blue-300 bg-white hover:bg-gradient-to-br hover:from-gray-50 hover:to-blue-50'
                 }`}
               >
-                <div className="relative w-8 h-8 lg:w-10 lg:h-10 rounded-lg mb-2 overflow-hidden shadow-md group-hover:shadow-lg transition-shadow">
+                <div className="relative w-6 h-6 lg:w-8 lg:h-8 rounded-lg mb-1 overflow-hidden shadow-md group-hover:shadow-lg transition-shadow">
                   <div className="absolute inset-0 rounded-lg" style={{ background: style.bodyColor }}></div>
-                  <div className="absolute top-0 left-0 w-5 lg:w-6 h-3 lg:h-4 rounded-tl-lg" style={{ background: style.tabColor }}></div>
+                  <div className="absolute top-0 left-0 w-4 lg:w-5 h-2 lg:h-3 rounded-tl-lg" style={{ background: style.tabColor }}></div>
                 </div>
-                <span className="text-xs lg:text-sm text-gray-700 font-medium text-center leading-tight">{style.name}</span>
+                <span className="text-[10px] lg:text-xs text-gray-700 font-medium text-center leading-tight">{style.name}</span>
               </button>
             ))}
           </div>
