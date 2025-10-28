@@ -168,11 +168,14 @@ export function drawFolder(ctx, config) {
       ctx.fillText(labelText, tx, ty);
     } else if (labelMode === 'image' && customImage) {
       const img = new Image();
+      // 允许跨域图片用于绘制，避免画布污染
+      img.crossOrigin = 'anonymous';
       img.src = customImage;
       img.onload = () => {
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-        ctx.shadowBlur = 5;
-        ctx.shadowOffsetY = 2;
+        // 移除图片阴影效果，避免描边
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
 
         // 将 imageSize 视为最大边界框尺寸，绘制时保持长宽比（contain）
         const boxSize = iconSize * (imageSize / 100);
@@ -180,7 +183,7 @@ export function drawFolder(ctx, config) {
           ? (imagePositionX === 'left' ? 30 : imagePositionX === 'right' ? 70 : 50)
           : imagePositionX;
         const posY = typeof imagePositionY === 'string'
-          ? (imagePositionY === 'top' ? 40 : imagePositionY === 'bottom' ? 80 : 60)
+          ? (imagePositionY === 'top' ? 40 : imagePositionY === 'bottom' ? 80 : 50)
           : imagePositionY;
         const centerX = iconSize * (posX / 100);
         const centerY = iconSize * (posY / 100);
@@ -215,6 +218,9 @@ export function drawFolder(ctx, config) {
         } else {
           ctx.drawImage(img, drawX, drawY, drawW, drawH);
         }
+      };
+      img.onerror = () => {
+        // 图片加载失败时，不阻塞其他绘制
       };
     }
   }

@@ -32,8 +32,9 @@ No installation required, use directly in your browser!
 - **Text Labels**: Support for custom text content, colors, and fonts
 - **Image Labels**: Support for uploading custom images as labels
 - **Font Selection**: Multiple font options (Segoe UI, Microsoft YaHei, PingFang, Inter, etc.)
-- **Precise Positioning**: Independent control of text and image position and size
-- **Real-time Adjustment**: Text size and position adjustable in real-time
+- **Smart Positioning**: Text and images default to centered display for optimal visual effect
+- **Precise Control**: Independent adjustment of text and image position and size (0-100% range)
+- **Real-time Preview**: Text size and position adjustments instantly reflected
 
 ### 🔧 Advanced Settings
 - **Gradient Angle**: 360-degree free adjustment of gradient direction
@@ -182,7 +183,13 @@ Issues and Pull Requests are welcome!
 
 ## 📝 Changelog
 
-### v1.2.0 (Latest)
+### v1.3.0 (Latest)
+- 🎯 Optimized default positioning: Image and text vertical position defaults to 50% (centered)
+- ⚡ Improved user experience: New labels automatically display centered for better visual appeal
+- 🔧 Unified default value logic: Ensured consistency between reset function and initial state
+- 🎨 Enhanced visual balance: Default centered position provides better visual effects
+
+### v1.2.0
 - 🎯 Fixed slider and recommended size label alignment issue
 - ⚡ Highlight effect disabled by default for better performance
 - 🎨 Optimized color picker interface and interaction

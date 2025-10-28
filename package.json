@@ -1,7 +1,7 @@
 {
   "name": "win11-folder-icon-generator",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.3.0",
   "type": "module",
   "description": "Windows 11 风格文件夹图标生成器",
   "license": "MIT",

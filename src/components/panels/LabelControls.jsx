@@ -1,6 +1,7 @@
 import React from 'react';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Check } from 'lucide-react';
 import { useLanguage } from '../../hooks/useLanguage.jsx';
+ 
 
 const LabelControls = ({
   showLabel,
@@ -34,6 +35,11 @@ const LabelControls = ({
   onChangeTextPositionX,
   textPositionY,
   onChangeTextPositionY,
+  // 新增：从图片推荐配色
+  recommendedColors,
+  isRecommendingColors,
+  onRecommendColorsFromImage,
+  onApplyRecommendedColors,
 }) => {
   const { t } = useLanguage();
   
@@ -245,6 +251,45 @@ const LabelControls = ({
                     </label>
                   </div>
 
+                  {/* 从图片推荐配色 */}
+  <div className="space-y-3">
+    <div className="flex items-center justify-between">
+      <span className="text-sm font-medium text-gray-700">🎨 {t('ai.recommendedColors')}</span>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onRecommendColorsFromImage}
+          disabled={isRecommendingColors}
+          className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all border ${isRecommendingColors ? 'bg-gray-200 text-gray-500 border-gray-300 cursor-not-allowed' : 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 hover:from-blue-200 hover:to-indigo-200 border-blue-200'}`}
+        >
+          <span className="mr-1">🔄</span>{isRecommendingColors ? t('ai.recommending') : t('ai.recommendColors')}
+        </button>
+      </div>
+    </div>
+
+                    {Array.isArray(recommendedColors) && recommendedColors.length > 0 && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {recommendedColors.map((scheme, idx) => (
+                          <div key={idx} className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white/80 hover:bg-white transition">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-md shadow-sm border border-gray-200" style={{ background: scheme.bodyColor }} title="Body" />
+                              <div className="w-8 h-8 rounded-md shadow-sm border border-gray-200" style={{ background: scheme.tabColor || scheme.bodyColor }} title="Tab" />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => onApplyRecommendedColors && onApplyRecommendedColors(scheme)}
+                              className="px-3 py-2 rounded-lg text-sm font-semibold bg-blue-500 hover:bg-blue-600 text-white shadow-sm"
+                            >
+                              {t('ai.applyColors')}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-3">
                       {t('imageSize')}
@@ -292,14 +337,14 @@ const LabelControls = ({
                     <label className="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
                       ↕️ {t('verticalPosition')}
                       <span className="text-blue-600 font-semibold">
-                        {typeof imagePositionY === 'number' ? imagePositionY : imagePositionY === 'top' ? 40 : imagePositionY === 'bottom' ? 80 : 60}%
+                        {typeof imagePositionY === 'number' ? imagePositionY : imagePositionY === 'top' ? 40 : imagePositionY === 'bottom' ? 80 : 50}%
                       </span>
                     </label>
                     <input
                       type="range"
                       min="0"
                       max="100"
-                      value={typeof imagePositionY === 'number' ? imagePositionY : imagePositionY === 'top' ? 40 : imagePositionY === 'bottom' ? 80 : 60}
+                      value={typeof imagePositionY === 'number' ? imagePositionY : imagePositionY === 'top' ? 40 : imagePositionY === 'bottom' ? 80 : 50}
                       onChange={(e) => onChangeImagePositionY(Number(e.target.value))}
                       className="w-full accent-blue-600 h-2 rounded-lg"
                     />

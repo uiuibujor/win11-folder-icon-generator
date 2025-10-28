@@ -7,11 +7,15 @@ import BasicSettings from './components/panels/BasicSettings.jsx';
 import ColorControls from './components/panels/ColorControls.jsx';
 import LabelControls from './components/panels/LabelControls.jsx';
 import IconSizeControl from './components/panels/IconSizeControl.jsx';
+import AIAssistant from './components/AIAssistant.jsx';
+import ImageLabelsPanel from './components/ImageLabelsPanel.jsx';
 import { getFillStyle, parseGradientOrColor } from './utils/gradients.js';
 import { canvasToICO } from './utils/exportIcon.js';
 import { calculateHslShifts, getCurrentColor, adjustBrightness, rgbToHex, parseColor } from './utils/colors.js';
 import { buildPresetStyles } from './constants/presetStyles.js';
 import { useLanguage } from './hooks/useLanguage.jsx';
+import { ensureTransparentBackground } from './utils/imageProcessing.js';
+import { recommendColorsFromImage } from './utils/imagePalette.js';
 
 
 const Win11FolderGenerator = () => {
@@ -24,21 +28,26 @@ const Win11FolderGenerator = () => {
   const [showLabel, setShowLabel] = useState(true);
   const [labelMode, setLabelMode] = useState('text'); // 'text' or 'image'
   const [customImage, setCustomImage] = useState(null);
+  // 从图片推荐配色状态
+  const [recommendedColors, setRecommendedColors] = useState([]);
+  const [isRecommendingColors, setIsRecommendingColors] = useState(false);
   const [folderStyle, setFolderStyle] = useState('custom');
   const [iconSize, setIconSize] = useState(256);
   const [imageSize, setImageSize] = useState(25); // 图片大小百分比 (相对于图标大小)
   const [imagePositionX, setImagePositionX] = useState(51); // 图片X位置百分比 (0-100)
-  const [imagePositionY, setImagePositionY] = useState(60); // 图片Y位置百分比 (0-100)
+  const [imagePositionY, setImagePositionY] = useState(50); // 图片Y位置百分比 (0-100)
   const [fontFamily, setFontFamily] = useState('Segoe UI'); // 字体选择
   const [exportFormat, setExportFormat] = useState('png'); // 导出格式选择
   const [showHighlight, setShowHighlight] = useState(false); // 高光效果开关
   const [presetCollapsed, setPresetCollapsed] = useState(true); // 预设样式栏收缩状态
+  // AI 图片标签列表（来自左侧 AIAssistant 上报）
+  const [aiImageLabels, setAiImageLabels] = useState([]);
   // 图片遮罩：限制图片在文件夹主体内
   const [clipImageToBody, setClipImageToBody] = useState(false);
   // 新增：标签文字大小与位置
   const [textSize, setTextSize] = useState(8); // 文字大小百分比 (相对于图标大小)
   const [textPositionX, setTextPositionX] = useState(50); // 文字X位置百分比 (0-100)
-  const [textPositionY, setTextPositionY] = useState(62); // 文字Y位置百分比 (0-100)
+  const [textPositionY, setTextPositionY] = useState(50); // 文字Y位置百分比 (0-100)
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -310,9 +319,10 @@ const Win11FolderGenerator = () => {
         const img = new Image();
         img.src = customImage;
         img.onload = () => {
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-          ctx.shadowBlur = 5;
-          ctx.shadowOffsetY = 2;
+          // 移除图片阴影效果，避免描边
+          ctx.shadowColor = 'transparent';
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetY = 0;
           
           const imgSize = iconSize * (imageSize / 100);
           const imgX = iconSize * (imagePositionX / 100) - imgSize / 2;
@@ -332,6 +342,8 @@ const Win11FolderGenerator = () => {
       const reader = new FileReader();
       reader.onload = (event) => {
         setCustomImage(event.target.result);
+        // 更换图片时清空推荐配色
+        setRecommendedColors([]);
       };
       reader.readAsDataURL(file);
     }
@@ -339,9 +351,41 @@ const Win11FolderGenerator = () => {
 
   const removeImage = () => {
     setCustomImage(null);
+    setRecommendedColors([]);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+
+  // 从已上传图片推荐配色
+  const handleRecommendColorsFromImage = async () => {
+    if (!customImage) return;
+    setIsRecommendingColors(true);
+    try {
+      const schemes = await recommendColorsFromImage(customImage, {
+        maxSize: 160,
+        step: 16,
+        sampleRate: 0.35,
+      });
+      setRecommendedColors(Array.isArray(schemes) ? schemes : []);
+    } catch (err) {
+      console.error('推荐配色失败: ', err);
+      setRecommendedColors([]);
+    } finally {
+      setIsRecommendingColors(false);
+    }
+  };
+
+  // 应用某个推荐配色到当前图标
+  const handleApplyRecommendedColors = (scheme) => {
+    if (!scheme) return;
+    const { bodyColor, tabColor, labelColor } = scheme;
+    setBodyColorValue(bodyColor);
+    setTabColorValue(tabColor || bodyColor); // 标签与主体分开配色，若无则回退主体色
+    setLabelColor(labelColor);
+    // 兼容旧状态
+    setFolderColor(bodyColor);
+    setTabColor(tabColor || bodyColor);
   };
 
 
@@ -369,6 +413,55 @@ const Win11FolderGenerator = () => {
     if (exportFormat === 'ico') {
       setTimeout(() => URL.revokeObjectURL(link.href), 100);
     }
+  };
+
+  // AI功能处理函数
+  const handleAILabelGenerated = (label) => {
+    setLabelText(label);
+  };
+
+  const handleAIColorRecommended = (bodyColor, labelColor) => {
+    // 更新颜色值
+    setBodyColorValue(bodyColor);
+    setTabColorValue(bodyColor); // 标签页使用相同的主体颜色
+    setLabelColor(labelColor);
+    
+    // 同时更新旧的颜色状态以保持兼容性
+    setFolderColor(bodyColor);
+    setTabColor(bodyColor);
+  };
+
+  const handleAIImageLabelGenerated = async (imageLabel) => {
+    // 将生成的图片设置为自定义图片（先进行透明背景处理）
+    if (imageLabel && imageLabel.url) {
+      const src = imageLabel.url;
+      try {
+        const processed = await ensureTransparentBackground(src, {
+          whiteThreshold: 245,
+          similarity: 22,
+          sampleSize: 10,
+        });
+        setCustomImage(processed || src);
+      } catch (e) {
+        setCustomImage(src);
+      }
+      setLabelMode('image'); // 切换到图片模式
+      setShowLabel(true);
+      
+      // 如果有描述，也设置为标签文字
+      if (imageLabel.description) {
+        setLabelText(imageLabel.description);
+      }
+    }
+  };
+
+  const handleBatchApply = (batchResult) => {
+    setLabelText(batchResult.label);
+    setBodyColorValue(batchResult.bodyColor);
+    setTabColorValue(batchResult.bodyColor);
+    setLabelColor(batchResult.labelColor);
+    setFolderColor(batchResult.bodyColor);
+    setTabColor(batchResult.bodyColor);
   };
 
 
@@ -562,6 +655,11 @@ const Win11FolderGenerator = () => {
                   onChangeTextPositionX={setTextPositionX}
                   textPositionY={textPositionY}
                   onChangeTextPositionY={setTextPositionY}
+                  // 新增：从图片推荐配色回调（移动到内容设置里）
+                  recommendedColors={recommendedColors}
+                  isRecommendingColors={isRecommendingColors}
+                  onRecommendColorsFromImage={handleRecommendColorsFromImage}
+                  onApplyRecommendedColors={handleApplyRecommendedColors}
                 />
                 </div>
               </div>
@@ -580,11 +678,11 @@ const Win11FolderGenerator = () => {
                   setIconSize(256);
                   setImageSize(25);
                   setImagePositionX(50);
-                  setImagePositionY(62);
+                  setImagePositionY(50);
                   // 新增重置：文字大小与位置
                   setTextSize(8);
                   setTextPositionX(50);
-                  setTextPositionY(62);
+                  setTextPositionY(50);
                   setFontFamily('Segoe UI');
                   setExportFormat('png');
                   setBodyGradAngle(90);
@@ -625,6 +723,20 @@ const Win11FolderGenerator = () => {
           </div>
         </div>
 
+        {/* AI功能区域 */}
+        <div className="mt-8 grid lg:grid-cols-2 gap-6">
+          <AIAssistant
+            onLabelGenerated={handleAILabelGenerated}
+            onImageLabelGenerated={handleAIImageLabelGenerated}
+            onImageLabelsGenerated={(list) => setAiImageLabels(Array.isArray(list) ? list : [])}
+            currentLabel={labelText}
+            currentDescription=""
+          />
+          <ImageLabelsPanel
+            imageLabels={aiImageLabels}
+            onApplyImageLabel={handleAIImageLabelGenerated}
+          />
+        </div>
         
         <div className="mt-8 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-2 border-blue-200/50 rounded-3xl p-6 lg:p-8 shadow-lg">
           <div className="flex items-center gap-3 mb-4">
@@ -676,7 +788,7 @@ const resetLabelSettings = () => {
   setCustomImage(null);
   setImageSize(40);
   setImagePositionX(50);
-  setImagePositionY(60);
+  setImagePositionY(50);
   setTextSize(12);
   setTextPositionX(50);
   setTextPositionY(50);
