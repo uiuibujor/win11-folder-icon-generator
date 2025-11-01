@@ -184,6 +184,7 @@ Issues and Pull Requests are welcome!
 ## 📝 Changelog
 
 ### v1.3.0 (Latest)
+- 🤖 AI Support
 - 🎯 Optimized default positioning: Image and text vertical position defaults to 50% (centered)
 - ⚡ Improved user experience: New labels automatically display centered for better visual appeal
 - 🔧 Unified default value logic: Ensured consistency between reset function and initial state

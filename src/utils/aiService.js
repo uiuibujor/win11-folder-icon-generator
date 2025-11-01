@@ -6,7 +6,7 @@ class AIService {
   constructor() {
     this.apiKey = localStorage.getItem('newapi_api_key') || '';
     this.baseURL = localStorage.getItem('newapi_base_url') || '';
-    this.model = localStorage.getItem('newapi_model') || 'gpt-3.5-turbo';
+    this.model = localStorage.getItem('newapi_model') || 'dall-e-3';
   }
 
   /**
@@ -15,7 +15,7 @@ class AIService {
    * @param {string} baseURL - New API服务器地址
    * @param {string} model - 使用的模型名称
    */
-  setApiConfig(apiKey, baseURL, model = 'gpt-3.5-turbo') {
+  setApiConfig(apiKey, baseURL, model = 'dall-e-3') {
     this.apiKey = apiKey;
     this.baseURL = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
     this.model = model;
